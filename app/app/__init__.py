@@ -5,7 +5,9 @@ from config import DATABASE_URL
 db = SQLAlchemy()
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder="templates")
+
+    # Database config
     app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.secret_key = "dev"
@@ -21,5 +23,10 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(driver_bp)
+
+    # Homepage (verplicht)
+    @app.route("/")
+    def index():
+        return "App draait! Ga naar /login om in te loggen."
 
     return app
