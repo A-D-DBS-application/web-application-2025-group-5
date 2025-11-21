@@ -1,6 +1,8 @@
+# app/models.py
+from datetime import datetime
+
 from . import db
 from sqlalchemy.orm import relationship
-from datetime import datetime
 
 
 class User(db.Model):
@@ -11,11 +13,10 @@ class User(db.Model):
     password_hash = db.Column(db.Text, nullable=False)
     name = db.Column(db.Text, nullable=False)
     role = db.Column(db.String(50), nullable=False)
-    is_active = db.Column(db.Boolean, default=True, nullable=False)
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    # relationships
     created_routes = relationship("Route", foreign_keys="Route.created_by_user_id")
     driven_routes = relationship("Route", foreign_keys="Route.driver_id")
 
@@ -31,7 +32,7 @@ class Vehicle(db.Model):
     brand = db.Column(db.Text, nullable=False)
     model = db.Column(db.Text)
     capacity_kg = db.Column(db.Numeric)
-    is_active = db.Column(db.Boolean, default=True, nullable=False)
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
@@ -46,7 +47,7 @@ class Customer(db.Model):
 
     customer_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False)
-    adress = db.Column(db.Text, nullable=False)   # Let op: DDL heeft 'adress'
+    adress = db.Column(db.Text, nullable=False)  # DDL heeft 'adress'
     phone = db.Column(db.String(20), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
@@ -154,3 +155,4 @@ class RouteDelivery(db.Model):
 
     def __repr__(self):
         return f"<RouteDelivery {self.route_delivery_id}>"
+
