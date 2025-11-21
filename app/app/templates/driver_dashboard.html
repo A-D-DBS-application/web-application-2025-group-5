@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Mijn Route{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 p-6">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-gray-900">Mijn Route</h1>
+            <p class="text-gray-500 text-sm">
+                {{ today.strftime('%A %d %B') }}
+            </p>
+        </div>
+
+        <a href="{{ url_for('auth.logout') }}"
+           class="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-100">
+            Uitloggen
+        </a>
+    </div>
+
+    <!-- Geen route -->
+    {% if not route %}
+    <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
+        <h2 class="text-xl font-semibold text-gray-900 mb-2">Geen route vandaag</h2>
+        <p class="text-gray-500">
+            Er is geen route voor jou gepland voor vandaag. Neem contact op met de admin
+            als je denkt dat dit een fout is.
+        </p>
+    </div>
+
+    {% else %}
+
+    <!-- Route details -->
+    <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm mb-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">
+            Route voor {{ today.strftime('%d/%m/%Y') }}
+        </h2>
+        <div class="space-y-2 text-gray-700">
+            <p><strong>Driver:</strong> {{ route.driver.name }}</p>
+            <p><strong>Voertuig:</strong>
+                {% if route.vehicle %}
+                    {{ route.vehicle.license_plate }} ({{ route.vehicle.brand }})
+                {% else %}
+                    Geen voertuig toegewezen
+                {% endif %}
+            </p>
+            <p><strong>Status:</strong> {{ route.route_status }}</p>
+        </div>
+    </div>
+
+    <!-- Stops / Leveringen -->
+    <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
+        <h3 class="text-lg font-semibold mb-4">Stops voor vandaag</h3>
+
+        {% if deliveries|length == 0 %}
+        <p class="text-gray-500">Geen leveringen toegewezen aan deze route.</p>
+
+        {% else %}
+        <ul class="space-y-4">
+            {% for d in deliveries %}
+            <li class="p-4 rounded-xl border border-gray-200 bg-gray-50 flex justify-between items-center">
+                <div>
+                    <p class="text-gray-900 font-medium">Order #{{ d.order_id }}</p>
+                    <p class="text-gray-600 text-sm">{{ d.order.delivery_address }}</p>
+                    <p class="text-gray-500 text-xs">
+                        Tijdslot: {{ d.order.delivery_window_start }} — {{ d.order.delivery_window_end }}
+                    </p>
+                </div>
+
+                <!-- Status badge -->
+                <span class="px-3 py-1 text-sm rounded-lg
+                    {% if d.delivery_status == 'delivered' %}
+                        bg-green-100 text-green-700
+                    {% elif d.delivery_status == 'failed' %}
+                        bg-red-100 text-red-700
+                    {% else %}
+                        bg-yellow-100 text-yellow-700
+                    {% endif %}">
+                    {{ d.delivery_status or "pending" }}
+                </span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+
+    {% endif %}
+
+</div>
+{% endblock %}
