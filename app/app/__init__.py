@@ -14,15 +14,26 @@ def create_app():
 
     db.init_app(app)
 
+    # Initialize Flask-Migrate (Alembic) for schema migrations
+    try:
+        from flask_migrate import Migrate
+
+        Migrate(app, db)
+    except Exception:
+        # If Flask-Migrate isn't installed or fails, continue — migrations are optional.
+        pass
+
     # Blueprints importeren
     from .auth_routes import auth_bp
     from .admin_routes import admin_bp
     from .driver_routes import driver_bp
+    from .preview_routes import preview_bp
 
     # Registreren
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(driver_bp)
+    app.register_blueprint(preview_bp)
 
     # Homepage (verplicht)
     @app.route("/")

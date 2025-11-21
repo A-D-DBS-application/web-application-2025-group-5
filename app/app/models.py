@@ -156,3 +156,9 @@ class RouteDelivery(db.Model):
     def __repr__(self):
         return f"<RouteDelivery {self.route_delivery_id}>"
 
+# Backwards-compatible aliases for existing route imports
+# Some route modules import older class names (e.g., `Purchase_orders`,
+# `Route_Delivery`). Provide aliases so those imports succeed.
+Purchase_orders = PurchaseOrders
+Route_Delivery = RouteDelivery
+
