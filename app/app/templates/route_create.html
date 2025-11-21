@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Nieuwe Route{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+  <div class="bg-white w-full max-w-lg p-8 rounded-2xl shadow-lg border border-gray-200">
+    <h2 class="text-xl font-semibold mb-1 text-gray-900">Nieuwe Route</h2>
+    <p class="text-gray-500 mb-6 text-sm">Wijs bestellingen toe aan een driver</p>
+
+    <form method="post">
+
+      <!-- Datum -->
+      <label class="block text-sm font-medium text-gray-700 mb-1">Datum *</label>
+      <input type="date" name="route_date" required
+             class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5
+                    focus:outline-none focus:ring-2 focus:ring-blue-500" />
+
+      <!-- Driver -->
+      <label class="block text-sm font-medium text-gray-700 mb-1">Driver *</label>
+      <select name="driver_id" required
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5">
+        <option value="">Selecteer driver</option>
+        {% for d in drivers %}
+        <option value="{{ d.user_id }}">{{ d.name }}</option>
+        {% endfor %}
+      </select>
+
+      <!-- Vehicle -->
+      <label class="block text-sm font-medium text-gray-700 mb-1">Voertuig (optioneel)</label>
+      <select name="vehicle_id"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5">
+        <option value="">Selecteer voertuig</option>
+        {% for v in vehicles %}
+        <option value="{{ v.vehicle_id }}">{{ v.license_plate }} – {{ v.brand }}</option>
+        {% endfor %}
+      </select>
+
+      <button type="submit"
+              class="w-full bg-blue-700 hover:bg-blue-800 text-white font-medium py-2 rounded-lg">
+        Route Aanmaken
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
