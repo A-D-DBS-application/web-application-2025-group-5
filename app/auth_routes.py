@@ -27,7 +27,7 @@ def login():
         if user.role == "admin":
             return redirect(url_for("admin.dashboard"))
         else:
-            return redirect(url_for("driver.routes_for_driver"))
+            return redirect(url_for("driver.dashboard"))
 
     # GET: toon loginpagina
     return render_template("login.html")
