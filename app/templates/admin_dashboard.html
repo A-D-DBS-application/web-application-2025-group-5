@@ -45,6 +45,13 @@
       <p class="text-3xl font-semibold text-slate-900">{{ drivers|length }}</p>
     </div>
   </div>
+  
+  <!-- Nieuw Account -->
+  <a href="{{ url_for('admin.create_user') }}"
+     class="block bg-white p-6 rounded-xl shadow hover:shadow-lg transition border border-gray-200 mb-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-1">Nieuw Account</h3>
+      <p class="text-gray-500 text-sm">Maak een nieuwe admin of driver aan</p>
+  </a>
 
   <!-- Tabs -->
   <div class="bg-white rounded-2xl border border-slate-200">
@@ -246,3 +253,4 @@
   });
 </script>
 {% endblock %}
+

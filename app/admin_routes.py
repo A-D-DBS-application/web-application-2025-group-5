@@ -164,3 +164,40 @@ def create_vehicle():
         return redirect(url_for("admin.dashboard"))
 
     return render_template("vehicle_create.html")
+
+# Nieuw account aanmaken
+@admin_bp.route("/users/new", methods=["GET", "POST"])
+def create_user():
+    # Enkel admins
+    if session.get("role") != "admin":
+        flash("Je hebt geen toegang tot deze pagina", "error")
+        return redirect(url_for("auth.login"))
+
+    if request.method == "POST":
+        name = request.form.get("name")
+        email = request.form.get("email")
+        role = request.form.get("role")
+        is_active = True
+
+        # Validatie (optioneel uitbreiden)
+        if not name or not email or not role:
+            flash("Alle verplichte velden moeten ingevuld zijn.", "error")
+            return redirect(url_for("admin.create_user"))
+
+        # Nieuwe user opslaan
+        new_user = User(
+            name=name,
+            email=email,
+            password_hash="",  # geen paswoord nodig in jullie systeem
+            role=role,
+            is_active=is_active
+        )
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash("Nieuw account succesvol aangemaakt!", "success")
+        return redirect(url_for("admin.dashboard"))
+
+    return render_template("user_create.html")
+
