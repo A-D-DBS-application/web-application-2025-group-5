@@ -3,7 +3,13 @@
 
 {% block content %}
 <div class="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-  <div class="bg-white w-full max-w-lg p-8 rounded-2xl shadow-lg border border-gray-200">
+  <div class="bg-white w-full max-w-lg p-8 rounded-2xl shadow-lg border border-gray-200 relative">
+
+    <!-- Sluit-knop -->
+    <a href="{{ url_for('admin.dashboard') }}"
+       class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl leading-none">
+        &times;
+    </a>
 
     <h2 class="text-xl font-semibold mb-1 text-gray-900">Nieuw Voertuig</h2>
     <p class="text-gray-500 mb-6 text-sm">Voeg een nieuw voertuig toe</p>
@@ -46,3 +52,4 @@
   </div>
 </div>
 {% endblock %}
+
