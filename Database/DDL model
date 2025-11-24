@@ -13,90 +13,92 @@ CREATE SCHEMA IF NOT EXISTS "public";
 
 CREATE TABLE "public"."Purchase_orders" (
     "payment_status" text NOT NULL,
-    "order_id" SERIAL PRIMARY KEY,
+    "order_id" BIGSERIAL PRIMARY KEY,
     "delivery_address" text NOT NULL,
     "customer_id" integer NOT NULL,
     "delivery_phone" varchar(20) NOT NULL,
-    "delivery_window_start" timestamp NOT NULL,
-    "delivery_window_end" timestamp NOT NULL,
-    "total_weight_kg" decimal NOT NULL,
+    "delivery_window_start" timestamptz NOT NULL,
+    "delivery_window_end" timestamptz NOT NULL,
+    "total_weight_kg" numeric(10,2) NOT NULL,
     "order_status" text NOT NULL,
-    "created_at" timestamp NOT NULL,
-    "updated_at" timestamp NOT NULL
+    "created_at" timestamp NOT NULL DEFAULT now(),
+    "updated_at" timestamp NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "public"."product" (
-    "product_id" SERIAL PRIMARY KEY,
+    "product_id" BIGSERIAL PRIMARY KEY,
     "available_qty" integer,
     "product_name" varchar(255) NOT NULL,
-    "created_at" timestamp NOT NULL,
-    "updated_at" timestamp NOT NULL
+    "created_at" timestamptz NOT NULL DEFAULT now(),
+    "updated_at" timestamp NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "public"."Route" (
-    "route_id" SERIAL PRIMARY KEY,
+    "route_id" BIGSERIAL PRIMARY KEY,
     "driver_id" integer NOT NULL,
     "vehicle_id" integer NOT NULL,
     "created_by_user_id" integer NOT NULL,
     "route_date" date NOT NULL,
     "route_status" text NOT NULL,
-    "started_at" timestamp NOT NULL,
-    "completed_at" timestamp NOT NULL,
-    "driver_day_comment" text NOT NULL,
-    "created_at" timestamp NOT NULL,
-    "updated_at" timestamp NOT NULL
+    "started_at" timestamptz NOT NULL,
+    "completed_at" timestamptz NOT NULL,
+    "driver_day_comment" text,
+    "created_at" timestamptz NOT NULL DEFAULT now(),
+    "updated_at" timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "public"."order_item" (
-    "order_item_id" SERIAL PRIMARY KEY,
+    "order_item_id" BIGSERIAL PRIMARY KEY,
     "order_id" integer NOT NULL,
     "product_id" integer NOT NULL,
-    "quantity" integer,
-    "price_per_unit" decimal,
-    "created_at" timestamp NOT NULL
+    "quantity" integer NOT NULL,
+    "price_per_unit" numeric(10,2),
+    "created_at" timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "public"."customer" (
-    "customer_id" SERIAL PRIMARY KEY,
+    "customer_id" BIGSERIAL PRIMARY KEY,
     "name" text NOT NULL,
-    "adress" text NOT NULL,
+    "address" text NOT NULL,
     "phone" varchar(20) NOT NULL,
-    "created_at" timestamp NOT NULL,
-    "updated_at" timestamp NOT NULL
+    "created_at" timestamptz NOT NULL DEFAULT now(),
+    "updated_at" timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "public"."user" (
     "user_id" SERIAL PRIMARY KEY,
     "email" text NOT NULL,
-    "password_hash" text NOT NULL,
+    "password_hash" text,
     "name" text NOT NULL,
     "role" varchar(50) NOT NULL,
     "is_active" boolean NOT NULL DEFAULT true,
-    "created_at" timestamp NOT NULL,
-    "updated_at" timestamp NOT NULL
+    "created_at" timestamptz NOT NULL DEFAULT now(),
+    "updated_at" timestamp NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "public"."vehicle" (
-    "vehicle_id" SERIAL PRIMARY KEY,
+    "vehicle_id" BIGSERIAL PRIMARY KEY,
     "license_plate" varchar(20) NOT NULL,
     "brand" text NOT NULL,
     "model" text,
-    "capacity_kg" decimal,
+    "color" text,
+    "capacity_kg" numeric(10,2),
+    "fuel_type" text NOT NULL,
     "is_active" boolean NOT NULL DEFAULT true,
-    "created_at" timestamp NOT NULL,
-    "updated_at" timestamp NOT NULL
+    "created_at" timestamptz NOT NULL DEFAULT now(),
+    "updated_at" timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "public"."route_delivery" (
-    "route_delivery_id" SERIAL PRIMARY KEY,
+    "route_delivery_id" BIGSERIAL PRIMARY KEY,
     "route_id" integer NOT NULL,
     "order_id" integer NOT NULL,
     "stop_sequence" integer NOT NULL,
     "delivery_status" text,
-    "delivery_at" timestamp,
+    "delivery_at" timestamptz,
     "delivery_comment" text,
-    "created_at" timestamp NOT NULL,
-    "updated_at" timestamp NOT NULL
+    "created_at" timestamptz NOT NULL DEFAULT now(),
+    "updated_at" timestamptz NOT NULL DEFAULT now()
 );
 
 -- Foreign key constraints
