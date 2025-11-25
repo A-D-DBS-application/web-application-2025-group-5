@@ -173,13 +173,17 @@ def create_vehicle():
         brand = request.form.get("brand")
         model = request.form.get("model")
         capacity = request.form.get("capacity_kg")
+        fuel_type = request.form.get("fuel_type")
+        color = request.form.get("color")
         is_active = request.form.get("is_active") == "on"
 
         vehicle = Vehicle(
             license_plate=license_plate,
             brand=brand,
             model=model,
+            color=color,
             capacity_kg=capacity,
+            fuel_type=fuel_type,
             is_active=is_active,
         )
 
