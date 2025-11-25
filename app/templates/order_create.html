@@ -16,19 +16,33 @@
 
     <form method="post">
 
-      <!-- Klant ID -->
-      <label class="block text-sm font-medium text-gray-700 mb-1">Klant ID *</label>
-      <input type="number" name="customer_id" required
-             class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5" />
+      <!-- KLANT ZOEKFUNCTIE -->
+      <label class="block text-sm font-medium text-gray-700 mb-1">Klant *</label>
+
+      <!-- Zoekveld -->
+      <div class="relative mb-5">
+        <input type="text" id="customer_search"
+               placeholder="Zoek klant..."
+               class="w-full border border-gray-300 rounded-lg px-3 py-2"
+               autocomplete="off">
+
+        <!-- Zoekresultaten dropdown -->
+        <div id="customer_results"
+             class="absolute left-0 right-0 bg-white border border-gray-300 rounded-lg mt-1 hidden z-20 max-h-60 overflow-y-auto">
+        </div>
+      </div>
+
+      <!-- Hidden echte customer_id -->
+      <input type="hidden" name="customer_id" id="customer_id" required />
 
       <!-- Adres -->
       <label class="block text-sm font-medium text-gray-700 mb-1">Bezorgadres *</label>
-      <input type="text" name="delivery_address" required
+      <input type="text" id="delivery_address" name="delivery_address" required
              class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5" />
 
       <!-- Telefoon -->
       <label class="block text-sm font-medium text-gray-700 mb-1">Telefoon *</label>
-      <input type="text" name="delivery_phone" required
+      <input type="text" id="delivery_phone" name="delivery_phone" required
              class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5" />
 
       <!-- Tijdvenster Start -->
@@ -69,7 +83,61 @@
       </button>
 
     </form>
+
+    <!-- JavaScript: zoekfunctie -->
+    <script>
+      const searchInput = document.getElementById("customer_search");
+      const resultsBox = document.getElementById("customer_results");
+
+      searchInput.addEventListener("input", async () => {
+        const q = searchInput.value.trim();
+
+        if (q.length < 2) {
+          resultsBox.classList.add("hidden");
+          return;
+        }
+
+        const response = await fetch(`/admin/customers/search?q=` + q);
+        const customers = await response.json();
+
+        resultsBox.innerHTML = "";
+        resultsBox.classList.remove("hidden");
+
+        if (customers.length === 0) {
+          resultsBox.innerHTML = "<div class='p-2 text-gray-500'>Geen resultaten</div>";
+          return;
+        }
+
+        customers.forEach(c => {
+          const item = document.createElement("div");
+          item.className =
+            "p-2 hover:bg-gray-100 cursor-pointer border-b border-gray-200";
+          item.textContent = `${c.name} – ${c.address}`;
+
+          item.addEventListener("click", () => {
+            document.getElementById("customer_id").value = c.id;
+            document.getElementById("delivery_address").value = c.address;
+            document.getElementById("delivery_phone").value = c.phone;
+
+            searchInput.value = c.name;
+
+            resultsBox.classList.add("hidden");
+          });
+
+          resultsBox.appendChild(item);
+        });
+      });
+
+      // Sluit dropdown bij klik buiten
+      document.addEventListener("click", (event) => {
+        if (!resultsBox.contains(event.target) && event.target !== searchInput) {
+          resultsBox.classList.add("hidden");
+        }
+      });
+    </script>
+
   </div>
 </div>
 {% endblock %}
+
 

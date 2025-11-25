@@ -59,21 +59,21 @@ class Customer(db.Model):
     __tablename__ = "customer"
 
     customer_id = db.Column(db.BigInteger, primary_key=True)
-    customer_name = db.Column(db.Text, nullable=False)
+    customer = db.Column(db.Text, nullable=False)
     last_name = db.Column(db.Text, nullable=False)
     first_name = db.Column(db.Text, nullable=False)
     street_number = db.Column(db.Text, nullable=False)
     postal_code = db.Column(db.Text, nullable=False)
     city = db.Column(db.Text, nullable=False)
     phone = db.Column(db.String(20))
-    cellphone = db.Column(db.String(20))
+    celphone = db.Column(db.String(20))
     created_at = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, nullable=False, server_default=db.func.now(), onupdate=db.func.now())
 
     orders = relationship("PurchaseOrders", back_populates="customer")
 
     def __repr__(self):
-        return f"<Customer {self.customer_name}>"
+        return f"<Customer {self.customer}>"
 
 
 # -----------------------------------------------------
