@@ -216,7 +216,11 @@
                     {{ v.brand }} {{ v.model or "" }}
                   </p>
                   <p class="text-sm text-slate-500">
-                    Capaciteit: {{ v.capacity_kg }} kg
+                    <p class="text-sm text-slate-500">
+                      Capaciteit: {{ v.capacity_kg }} kg
+                  </p>
+                  <p class="text-sm text-slate-500">
+                    Kleur: {{ v.color or "Onbekend" }}
                   </p>
                 </div>
                 <span class="px-2 py-1 rounded-full text-xs
