@@ -3,11 +3,11 @@
 
 {% block content %}
 <div class="min-h-screen bg-slate-50 px-6 py-6">
+
   <!-- Topbar -->
   <div class="flex items-center justify-between mb-6">
     <div class="flex items-center gap-3">
       <div class="bg-blue-600 text-white w-12 h-12 rounded-xl flex items-center justify-center shadow">
-        <!-- simpel truck icoon -->
         <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24"
              stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -45,7 +45,7 @@
       <p class="text-3xl font-semibold text-slate-900">{{ drivers|length }}</p>
     </div>
   </div>
-  
+
   <!-- Nieuw Account -->
   <a href="{{ url_for('admin.create_user') }}"
      class="block bg-white p-6 rounded-xl shadow hover:shadow-lg transition border border-gray-200 mb-6">
@@ -55,87 +55,96 @@
 
   <!-- Tabs -->
   <div class="bg-white rounded-2xl border border-slate-200">
+
     <!-- Tab header -->
     <div class="border-b border-slate-200 px-4 pt-3">
       <div class="flex gap-4">
-        <!-- Bestellingen NIET standaard actief -->
         <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-slate-600 hover:text-blue-700"
-                data-tab="orders">
-          Bestellingen
-        </button>
-        <!-- Routes WEL standaard actief (zoals op jouw screenshot) -->
+                data-tab="orders">Bestellingen</button>
+
         <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-blue-700 bg-blue-50"
-                data-tab="routes">
-          Routes
-        </button>
+                data-tab="routes">Routes</button>
+
         <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-slate-600 hover:text-blue-700"
-                data-tab="drivers">
-          Drivers
-        </button>
+                data-tab="drivers">Drivers</button>
+
         <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-slate-600 hover:text-blue-700"
-                data-tab="vehicles">
-          Voertuigen
-        </button>
+                data-tab="vehicles">Voertuigen</button>
       </div>
     </div>
 
-    <!-- Tab content -->
+    <!-- Tab content container -->
     <div class="p-6 space-y-6">
-      <!-- Orders tab (standaard verborgen) -->
+
+      <!-- Orders tab (hidden by default) -->
       <section id="tab-orders" class="tab-pane hidden">
+
         <div class="flex items-center justify-between mb-4">
           <div>
             <h2 class="text-lg font-semibold text-slate-900">Orders</h2>
             <p class="text-sm text-slate-500">Beheer bestellingen</p>
           </div>
-          <a href="{{ url_for('admin.create_order') }}"
-             class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-700 text-white text-sm hover:bg-blue-800">
-            + Nieuwe Order
-          </a>
+
+          <div class="flex items-center gap-3">
+
+            <!-- Zoekveld -->
+            <form method="get" action="{{ url_for('admin.dashboard') }}">
+              <input type="text" name="q"
+                     placeholder="Zoek op klant, telefoon, adres, gewicht..."
+                     value="{{ request.args.get('q', '') }}"
+                     class="px-3 py-2 rounded-lg border border-slate-300 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </form>
+
+            <a href="{{ url_for('admin.create_order') }}"
+               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-700 text-white text-sm hover:bg-blue-800">
+              + Nieuwe Order
+            </a>
+          </div>
         </div>
 
         {% if orders %}
-          <div class="space-y-3">
-            {% for o in orders %}
-              <div class="border border-slate-200 rounded-xl p-4 flex justify-between">
-                <div class="space-y-1">
-                  <p class="font-semibold text-slate-900">Order #{{ o.order_id }}</p>
-                  <p class="text-sm text-slate-500">
-                    Klant: {{ o.customer.name if o.customer }} – {{ o.delivery_address }}
-                  </p>
-                  <p class="text-sm text-slate-500">
-                    Tel: {{ o.delivery_phone }} | Gewicht: {{ o.total_weight_kg }} kg
-                  </p>
-                  <p class="text-sm text-slate-500">
-                    Tijdvenster:
-                    {{ o.delivery_window_start }} – {{ o.delivery_window_end }}
-                  </p>
-                </div>
-                <div class="flex flex-col gap-2 items-end text-xs">
-                  <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700">
-                    Order: {{ o.order_status }}
-                  </span>
-                  <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700">
-                    Betaling: {{ o.payment_status }}
-                  </span>
-                </div>
-              </div>
-            {% endfor %}
+        <div class="space-y-3">
+          {% for o in orders %}
+          <div class="border border-slate-200 rounded-xl p-4 flex justify-between">
+            <div class="space-y-1">
+              <p class="font-semibold text-slate-900">Order #{{ o.order_id }}</p>
+              <p class="text-sm text-slate-500">
+                Klant: {{ o.customer.first_name }} {{ o.customer.last_name }} – {{ o.delivery_address }}
+              </p>
+              <p class="text-sm text-slate-500">
+                Tel: {{ o.delivery_phone }} | Gewicht: {{ o.total_weight_kg }} kg
+              </p>
+              <p class="text-sm text-slate-500">
+                Tijdvenster: {{ o.delivery_window_start }} – {{ o.delivery_window_end }}
+              </p>
+            </div>
+
+            <div class="flex flex-col gap-2 items-end text-xs">
+              <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700">
+                Order: {{ o.order_status }}
+              </span>
+              <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700">
+                Betaling: {{ o.payment_status }}
+              </span>
+            </div>
           </div>
+          {% endfor %}
+        </div>
         {% else %}
-          <p class="text-center text-slate-400 py-10">
-            Nog geen orders. Klik op 'Nieuwe Order' om te beginnen.
-          </p>
+          <p class="text-center text-slate-400 py-10">Nog geen orders.</p>
         {% endif %}
+
       </section>
 
-      <!-- Routes tab (standaard zichtbaar) -->
+      <!-- Routes tab -->
       <section id="tab-routes" class="tab-pane">
+
         <div class="flex items-center justify-between mb-4">
           <div>
             <h2 class="text-lg font-semibold text-slate-900">Routes</h2>
             <p class="text-sm text-slate-500">Beheer dagelijkse routes</p>
           </div>
+
           <a href="{{ url_for('admin.create_route') }}"
              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-700 text-white text-sm hover:bg-blue-800">
             + Nieuwe Route
@@ -143,84 +152,77 @@
         </div>
 
         {% if routes %}
-          <div class="space-y-3">
-            {% for r in routes %}
-              <div class="border border-slate-200 rounded-xl p-4 flex items-center justify-between">
-                <!-- Linkerzijde: route-info -->
-                <div class="space-y-1">
-                  <p class="font-semibold text-slate-900">
-                    {{ r.route_date }} – {{ r.driver.name if r.driver }}
-                  </p>
-                  <p class="text-sm text-slate-500">
-                    Voertuig: {{ r.vehicle.license_plate if r.vehicle }}
-                  </p>
-                  <p class="text-sm text-slate-500">
-                    Status: {{ r.route_status }}
-                  </p>
-                </div>
+        <div class="space-y-3">
+          {% for r in routes %}
+          <div class="border border-slate-200 rounded-xl p-4 flex items-center justify-between">
 
-                <!-- Rechterzijde: blauwe en rode knop -->
-                <div class="flex flex-col gap-2 items-end">
-                  <!-- Blauwe knop: bestellingen toewijzen -->
-                  <a href="{{ url_for('admin.assign_orders', route_id=r.route_id) }}"
-                     class="inline-flex items-center justify-center px-4 py-1.5 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700">
-                    Bestellingen toewijzen
-                  </a>
+            <div class="space-y-1">
+              <p class="font-semibold text-slate-900">
+                {{ r.route_date.strftime('%d/%m/%Y') }} – {{ r.driver.name }}
+              </p>
+              <p class="text-sm text-slate-500">Voertuig: {{ r.vehicle.license_plate }}</p>
+              <p class="text-sm text-slate-500">Status: {{ r.route_status }}</p>
+            </div>
 
-                  <!-- Rode knop: route verwijderen -->
-                  <form method="post"
-                        action="{{ url_for('admin.delete_route', route_id=r.route_id) }}"
-                        onsubmit="return confirm('Weet je zeker dat je deze route wilt verwijderen?');">
-                    <button type="submit"
-                            class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs hover:bg-red-700">
-                      Route verwijderen
-                    </button>
-                  </form>
-                </div>
-              </div>
-            {% endfor %}
+            <div class="flex flex-col gap-2 items-end">
+
+              <a href="{{ url_for('admin.assign_orders', route_id=r.route_id) }}"
+                 class="inline-flex items-center justify-center px-4 py-1.5 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700">
+                Bestellingen toewijzen
+              </a>
+
+              <form method="post"
+                    action="{{ url_for('admin.delete_route', route_id=r.route_id) }}"
+                    onsubmit="return confirm('Weet je zeker dat je deze route wilt verwijderen?');">
+
+                <button type="submit"
+                        class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs hover:bg-red-700">
+                  Route verwijderen
+                </button>
+              </form>
+
+            </div>
           </div>
+          {% endfor %}
+        </div>
         {% else %}
-          <p class="text-center text-slate-400 py-10">
-            Nog geen routes. Klik op 'Nieuwe Route' om te beginnen.
-          </p>
+          <p class="text-center text-slate-400 py-10">Nog geen routes.</p>
         {% endif %}
+
       </section>
 
       <!-- Drivers tab -->
       <section id="tab-drivers" class="tab-pane hidden">
+
         <div class="mb-4">
           <h2 class="text-lg font-semibold text-slate-900">Drivers</h2>
           <p class="text-sm text-slate-500">Overzicht van alle drivers</p>
         </div>
 
         {% if drivers %}
-          <div class="space-y-3">
-            {% for d in drivers %}
-              <div class="border border-slate-200 rounded-xl p-4 flex justify-between">
-                <div class="space-y-1">
-                  <p class="font-semibold text-slate-900">{{ d.name }}</p>
-                </div>
-                <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700 text-xs">
-                  Driver
-                </span>
-              </div>
-            {% endfor %}
+        <div class="space-y-3">
+          {% for d in drivers %}
+          <div class="border border-slate-200 rounded-xl p-4 flex justify-between">
+            <p class="font-semibold text-slate-900">{{ d.name }}</p>
+            <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700 text-xs">Driver</span>
           </div>
+          {% endfor %}
+        </div>
         {% else %}
-          <p class="text-center text-slate-400 py-10">
-            Nog geen drivers. Users moeten zich registreren en een admin moet hen de driver rol geven.
-          </p>
+          <p class="text-center text-slate-400 py-10">Nog geen drivers.</p>
         {% endif %}
+
       </section>
 
       <!-- Vehicles tab -->
       <section id="tab-vehicles" class="tab-pane hidden">
+
         <div class="flex items-center justify-between mb-4">
           <div>
             <h2 class="text-lg font-semibold text-slate-900">Voertuigen</h2>
             <p class="text-sm text-slate-500">Beheer alle voertuigen</p>
           </div>
+
           <a href="{{ url_for('admin.create_vehicle') }}"
              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-700 text-white text-sm hover:bg-blue-800">
             + Nieuw Voertuig
@@ -228,55 +230,66 @@
         </div>
 
         {% if vehicles %}
-          <div class="space-y-3">
-            {% for v in vehicles %}
-              <div class="border border-slate-200 rounded-xl p-4 flex justify-between">
-                <div class="space-y-1">
-                  <p class="font-semibold text-slate-900">{{ v.license_plate }}</p>
-                  <p class="text-sm text-slate-500">
-                    {{ v.brand }} {{ v.model or "" }}
-                  </p>
-                  <p class="text-sm text-slate-500">
-                    Capaciteit: {{ v.capacity_kg }} kg
-                  </p>
-                  <p class="text-sm text-slate-500">
-                    Brandstof: {{ v.fuel_type or "Onbekend" }}
-                  </p>
-                  <p class="text-sm text-slate-500">
-                    Kleur: {{ v.color or "Onbekend" }}
-                  </p>
-                </div>
-                <span class="px-2 py-1 rounded-full text-xs
-                             {% if v.is_active %}bg-green-100 text-green-700{% else %}bg-slate-100 text-slate-600{% endif %}">
-                  {{ "Actief" if v.is_active else "Inactief" }}
-                </span>
-              </div>
-            {% endfor %}
+        <div class="space-y-3">
+          {% for v in vehicles %}
+          <div class="border border-slate-200 rounded-xl p-4 flex justify-between">
+
+            <div class="space-y-1">
+              <p class="font-semibold text-slate-900">{{ v.license_plate }}</p>
+              <p class="text-sm text-slate-500">{{ v.brand }} {{ v.model or "" }}</p>
+              <p class="text-sm text-slate-500">Capaciteit: {{ v.capacity_kg }} kg</p>
+              <p class="text-sm text-slate-500">Brandstof: {{ v.fuel_type }}</p>
+              <p class="text-sm text-slate-500">Kleur: {{ v.color }}</p>
+            </div>
+
+            <span class="px-2 py-1 rounded-full text-xs
+                         {% if v.is_active %}bg-green-100 text-green-700{% else %}bg-slate-100 text-slate-600{% endif %}">
+              {{ "Actief" if v.is_active else "Inactief" }}
+            </span>
+
           </div>
+          {% endfor %}
+        </div>
         {% else %}
-          <p class="text-center text-slate-400 py-10">
-            Nog geen voertuigen.
-          </p>
+          <p class="text-center text-slate-400 py-10">Nog geen voertuigen.</p>
         {% endif %}
+
       </section>
+
     </div>
   </div>
+
 </div>
 
 <script>
-  // simpele tabswitcher
   const buttons = document.querySelectorAll(".tab-btn");
   const panes = document.querySelectorAll(".tab-pane");
 
-  buttons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const tab = btn.dataset.tab;
-      buttons.forEach(b => b.classList.remove("bg-blue-50", "text-blue-700"));
-      btn.classList.add("bg-blue-50", "text-blue-700");
-      panes.forEach(p => {
-        p.id === "tab-" + tab ? p.classList.remove("hidden") : p.classList.add("hidden");
-      });
+  function activateTab(tabName) {
+    buttons.forEach(b => {
+      b.classList.remove("bg-blue-50", "text-blue-700");
+      if (b.dataset.tab === tabName) {
+        b.classList.add("bg-blue-50", "text-blue-700");
+      }
     });
+
+    panes.forEach(p => {
+      p.id === "tab-" + tabName
+        ? p.classList.remove("hidden")
+        : p.classList.add("hidden");
+    });
+  }
+
+  // Manuele klik
+  buttons.forEach(btn => {
+    btn.addEventListener("click", () => activateTab(btn.dataset.tab));
   });
+
+  // 📌 Automatisch Orders activeren bij een zoekterm
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("q")) {
+    activateTab("orders");
+  }
 </script>
+
 {% endblock %}

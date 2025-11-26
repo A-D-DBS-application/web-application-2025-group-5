@@ -1,5 +1,6 @@
 # app/admin_routes.py
 from datetime import date
+from sqlalchemy import or_
 from datetime import datetime  
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 from .models import Route, User, Vehicle, Purchase_orders, Customer, Route_Delivery
@@ -30,7 +31,49 @@ def dashboard():
     routes = Route.query.order_by(Route.route_date.desc()).all()
     drivers = User.query.filter_by(role="driver", is_active=True).all()
     vehicles = Vehicle.query.filter_by(is_active=True).all()
-    orders = Purchase_orders.query.order_by(Purchase_orders.created_at.desc()).all()
+
+    # ----- ORDER SEARCH -----
+   # ----- ORDER SEARCH -----
+    search_raw = request.args.get("q")
+    search = (search_raw or "").strip()
+
+    # Reset als q BESTAAT maar leeg is
+    if search_raw is not None and search == "":
+        return redirect(url_for("admin.dashboard"))
+
+
+    if search:
+        search_pattern = f"%{search}%"
+
+        filters = [
+            Purchase_orders.delivery_address.ilike(search_pattern),
+            Purchase_orders.delivery_phone.ilike(search_pattern),
+            Purchase_orders.order_status.ilike(search_pattern),
+            Purchase_orders.payment_status.ilike(search_pattern),
+            Customer.first_name.ilike(search_pattern),
+            Customer.last_name.ilike(search_pattern),
+            Customer.customer.ilike(search_pattern),
+            Customer.street_number.ilike(search_pattern),
+        ]
+
+        # Als de zoekterm numeriek is -> exact match op gewicht en order_id
+        if search.isdigit():
+            num = int(search)
+            filters.append(Purchase_orders.order_id == num)
+            filters.append(Purchase_orders.total_weight_kg == num)
+        else:
+            # Niet-numeriek: order_id als tekst (bv "9" matcht 9 en 19)
+            filters.append(Purchase_orders.order_id.cast(db.Text).ilike(search_pattern))
+
+        orders = (
+            Purchase_orders.query
+            .join(Customer)
+            .filter(or_(*filters))
+            .order_by(Purchase_orders.created_at.desc())
+            .all()
+        )
+    else:
+        orders = Purchase_orders.query.order_by(Purchase_orders.created_at.desc()).all()
 
     total_orders = Purchase_orders.query.count()
     pending_orders = Purchase_orders.query.filter_by(order_status="pending").count()
@@ -47,7 +90,6 @@ def dashboard():
         pending_orders=pending_orders,
         active_routes=active_routes,
     )
-
 
 # -----------------------------
 #  NIEUWE ROUTE AANMAKEN
@@ -84,7 +126,6 @@ def create_route():
     vehicles = Vehicle.query.filter_by(is_active=True).all()
 
     return render_template("route_create.html", drivers=drivers, vehicles=vehicles)
-
 
 # -----------------------------
 #  NIEUWE ORDER AANMAKEN
