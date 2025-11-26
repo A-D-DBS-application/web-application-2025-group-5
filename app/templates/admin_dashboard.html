@@ -58,11 +58,13 @@
     <!-- Tab header -->
     <div class="border-b border-slate-200 px-4 pt-3">
       <div class="flex gap-4">
-        <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-blue-700 bg-blue-50"
+        <!-- Bestellingen NIET standaard actief -->
+        <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-slate-600 hover:text-blue-700"
                 data-tab="orders">
           Bestellingen
         </button>
-        <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-slate-600 hover:text-blue-700"
+        <!-- Routes WEL standaard actief (zoals op jouw screenshot) -->
+        <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-blue-700 bg-blue-50"
                 data-tab="routes">
           Routes
         </button>
@@ -79,8 +81,8 @@
 
     <!-- Tab content -->
     <div class="p-6 space-y-6">
-      <!-- Orders tab -->
-      <section id="tab-orders" class="tab-pane">
+      <!-- Orders tab (standaard verborgen) -->
+      <section id="tab-orders" class="tab-pane hidden">
         <div class="flex items-center justify-between mb-4">
           <div>
             <h2 class="text-lg font-semibold text-slate-900">Orders</h2>
@@ -127,8 +129,8 @@
         {% endif %}
       </section>
 
-      <!-- Routes tab -->
-      <section id="tab-routes" class="tab-pane hidden">
+      <!-- Routes tab (standaard zichtbaar) -->
+      <section id="tab-routes" class="tab-pane">
         <div class="flex items-center justify-between mb-4">
           <div>
             <h2 class="text-lg font-semibold text-slate-900">Routes</h2>
@@ -143,7 +145,8 @@
         {% if routes %}
           <div class="space-y-3">
             {% for r in routes %}
-              <div class="border border-slate-200 rounded-xl p-4 flex justify-between">
+              <div class="border border-slate-200 rounded-xl p-4 flex items-center justify-between">
+                <!-- Linkerzijde: route-info -->
                 <div class="space-y-1">
                   <p class="font-semibold text-slate-900">
                     {{ r.route_date }} – {{ r.driver.name if r.driver }}
@@ -154,6 +157,25 @@
                   <p class="text-sm text-slate-500">
                     Status: {{ r.route_status }}
                   </p>
+                </div>
+
+                <!-- Rechterzijde: blauwe en rode knop -->
+                <div class="flex flex-col gap-2 items-end">
+                  <!-- Blauwe knop: bestellingen toewijzen -->
+                  <a href="{{ url_for('admin.assign_orders', route_id=r.route_id) }}"
+                     class="inline-flex items-center justify-center px-4 py-1.5 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700">
+                    Bestellingen toewijzen
+                  </a>
+
+                  <!-- Rode knop: route verwijderen -->
+                  <form method="post"
+                        action="{{ url_for('admin.delete_route', route_id=r.route_id) }}"
+                        onsubmit="return confirm('Weet je zeker dat je deze route wilt verwijderen?');">
+                    <button type="submit"
+                            class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs hover:bg-red-700">
+                      Route verwijderen
+                    </button>
+                  </form>
                 </div>
               </div>
             {% endfor %}
@@ -178,7 +200,6 @@
               <div class="border border-slate-200 rounded-xl p-4 flex justify-between">
                 <div class="space-y-1">
                   <p class="font-semibold text-slate-900">{{ d.name }}</p>
-                  <!-- eventueel telefoon later toevoegen -->
                 </div>
                 <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700 text-xs">
                   Driver
@@ -216,11 +237,10 @@
                     {{ v.brand }} {{ v.model or "" }}
                   </p>
                   <p class="text-sm text-slate-500">
-                    <p class="text-sm text-slate-500">
-                      Capaciteit: {{ v.capacity_kg }} kg
+                    Capaciteit: {{ v.capacity_kg }} kg
                   </p>
                   <p class="text-sm text-slate-500">
-                      Brandstof: {{ v.fuel_type or "Onbekend" }}
+                    Brandstof: {{ v.fuel_type or "Onbekend" }}
                   </p>
                   <p class="text-sm text-slate-500">
                     Kleur: {{ v.color or "Onbekend" }}
@@ -260,4 +280,3 @@
   });
 </script>
 {% endblock %}
-

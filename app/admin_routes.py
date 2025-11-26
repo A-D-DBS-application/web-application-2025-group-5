@@ -1,7 +1,8 @@
 # app/admin_routes.py
 from datetime import date
+from datetime import datetime  
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
-from .models import Route, User, Vehicle, Purchase_orders, Customer
+from .models import Route, User, Vehicle, Purchase_orders, Customer, Route_Delivery
 from . import db
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -123,6 +124,88 @@ def create_order():
         return redirect(url_for("admin.dashboard"))
 
     return render_template("order_create.html")
+
+# -----------------------------
+#  BESTELLINGEN TOEWIJZEN AAN ROUTE
+# -----------------------------
+@admin_bp.route("/routes/<int:route_id>/assign", methods=["GET", "POST"])
+def assign_orders(route_id):
+    if not require_admin():
+        return redirect(url_for("auth.login"))
+
+    route = Route.query.get_or_404(route_id)
+
+    # POST: bestellingen toewijzen
+    if request.method == "POST":
+        order_ids = request.form.getlist("order_ids")
+        if not order_ids:
+            flash("Selecteer minstens één bestelling om toe te wijzen.", "error")
+            return redirect(url_for("admin.assign_orders", route_id=route_id))
+
+        # Bepaal hoogste huidige sequence zodat nieuwe orders erachter komen
+        current_max_seq = 0
+        if route.deliveries:
+            current_max_seq = max(d.sequence for d in route.deliveries)
+
+        for idx, oid in enumerate(order_ids, start=1):
+            delivery = Route_Delivery(
+                route_id=route.route_id,
+                order_id=int(oid),
+                sequence=current_max_seq + idx,
+                delivery_status="planned",
+            )
+            db.session.add(delivery)
+
+        db.session.commit()
+        flash("Bestellingen succesvol aan de route toegewezen!", "success")
+        return redirect(url_for("admin.dashboard"))
+
+    # GET: filteren op leverdatum
+    delivery_date_str = request.args.get("delivery_date")
+    if delivery_date_str:
+        try:
+            selected_date = datetime.strptime(delivery_date_str, "%Y-%m-%d").date()
+        except ValueError:
+            selected_date = route.route_date
+    else:
+        selected_date = route.route_date
+
+    # Alleen orders tonen met deze leverdatum en die nog niet aan een route hangen
+    available_orders = (
+        Purchase_orders.query
+        .filter(
+            db.func.date(Purchase_orders.delivery_window_start) == selected_date,
+            ~Purchase_orders.route_links.any()  # nog niet toegewezen
+        )
+        .order_by(Purchase_orders.order_id.asc())
+        .all()
+    )
+
+    return render_template(
+        "route_assign.html",
+        route=route,
+        selected_date=selected_date,
+        available_orders=available_orders,
+    )
+
+# -----------------------------
+#  ROUTE VERWIJDEREN
+# -----------------------------
+@admin_bp.route("/routes/<int:route_id>/delete", methods=["POST"])
+def delete_route(route_id):
+    if not require_admin():
+        return redirect(url_for("auth.login"))
+
+    route = Route.query.get_or_404(route_id)
+
+    # Eerst alle gekoppelde deliveries verwijderen
+    Route_Delivery.query.filter_by(route_id=route.route_id).delete()
+
+    db.session.delete(route)
+    db.session.commit()
+
+    flash("Route succesvol verwijderd.", "success")
+    return redirect(url_for("admin.dashboard"))
 
 
 # -----------------------------
