@@ -84,6 +84,8 @@ CREATE TABLE IF NOT EXISTS public.purchase_orders (
     delivery_window_end   timestamptz NOT NULL,
     total_weight_kg       numeric(10,0) NOT NULL,
     order_status          text NOT NULL,
+    lat                   numeric(10,6),
+    ing                   numeric(10,6),
     created_at            timestamptz NOT NULL DEFAULT now(),
     updated_at            timestamptz NOT NULL DEFAULT now(),
     CONSTRAINT fk_purchase_orders_customer
