@@ -36,7 +36,7 @@ def dashboard():
         deliveries = (
             Route_Delivery.query
             .filter_by(route_id=route.route_id)
-            .order_by(Route_Delivery.stop_sequence.asc())
+            .order_by(Route_Delivery.sequence.asc())
             .all()
         )
 

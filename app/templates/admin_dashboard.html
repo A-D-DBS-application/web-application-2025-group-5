@@ -280,16 +280,20 @@
     });
   }
 
-  // Manuele klik
+  // klik-acties
   buttons.forEach(btn => {
     btn.addEventListener("click", () => activateTab(btn.dataset.tab));
   });
 
-  // 📌 Automatisch Orders activeren bij een zoekterm
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get("q")) {
-    activateTab("orders");
+  // ⭐ NIEUWE REGEL: Orders-tab actief zolang q bestaat (ook als het leeg is)
+  const params = new URLSearchParams(window.location.search);
+
+  if (params.has("q")) {
+    activateTab("orders");   // blijf in orders zolang q in de URL staat
+  } else {
+    activateTab("routes");   // standaard tab
   }
 </script>
+
 
 {% endblock %}
