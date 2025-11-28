@@ -70,8 +70,7 @@ class Customer(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, nullable=False, server_default=db.func.now(), onupdate=db.func.now())
 
-    orders = relationship("PurchaseOrders", back_populates="customer")
-
+   
     def __repr__(self):
         return f"<Customer {self.customer}>"
 
@@ -115,6 +114,8 @@ class PurchaseOrders(db.Model):
     customer = relationship("Customer", back_populates="orders")
     items = relationship("OrderItem", back_populates="order")
     route_links = relationship("RouteDelivery", back_populates="order")
+
+
 
     def __repr__(self):
         return f"<PurchaseOrder {self.order_id}>"
@@ -187,6 +188,7 @@ class RouteDelivery(db.Model):
 
     def __repr__(self):
         return f"<RouteDelivery {self.route_delivery_id}>"
+
 
 # Backwards compatibility alias# Compatibility aliases for old imports
 User = Users
