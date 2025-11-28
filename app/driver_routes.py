@@ -28,14 +28,40 @@ def dashboard():
     driver_id = session.get("user_id")
     today = date.today()
 
-    # Route ophalen voor vandaag
-    route = Route.query.filter_by(driver_id=driver_id, route_date=today).first()
+    # Vandaag + morgen berekenen
+    from datetime import timedelta
+    tomorrow = today + timedelta(days=1)
 
-    deliveries = []
-    if route:
-        deliveries = (
+    # -------------------------
+    # Route van vandaag ophalen
+    # -------------------------
+    route_today = Route.query.filter_by(
+        driver_id=driver_id,
+        route_date=today
+    ).first()
+
+    deliveries_today = []
+    if route_today:
+        deliveries_today = (
             Route_Delivery.query
-            .filter_by(route_id=route.route_id)
+            .filter_by(route_id=route_today.route_id)
+            .order_by(Route_Delivery.sequence.asc())
+            .all()
+        )
+
+    # -------------------------
+    # Route van morgen ophalen
+    # -------------------------
+    route_tomorrow = Route.query.filter_by(
+        driver_id=driver_id,
+        route_date=tomorrow
+    ).first()
+
+    deliveries_tomorrow = []
+    if route_tomorrow:
+        deliveries_tomorrow = (
+            Route_Delivery.query
+            .filter_by(route_id=route_tomorrow.route_id)
             .order_by(Route_Delivery.sequence.asc())
             .all()
         )
@@ -43,9 +69,13 @@ def dashboard():
     return render_template(
         "driver_dashboard.html",
         today=today,
-        route=route,
-        deliveries=deliveries
+        tomorrow=tomorrow,
+        route_today=route_today,
+        route_tomorrow=route_tomorrow,
+        deliveries_today=deliveries_today,
+        deliveries_tomorrow=deliveries_tomorrow
     )
+
 
 
 # -----------------------------

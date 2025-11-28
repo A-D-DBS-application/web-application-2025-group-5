@@ -19,9 +19,9 @@
         </a>
     </div>
 
-    <!-- Geen route -->
-    {% if not route %}
-    <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
+    <!-- ROUTE VAN VANDAAG -->
+    {% if not route_today %}
+    <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm mb-10">
         <h2 class="text-xl font-semibold text-gray-900 mb-2">Geen route vandaag</h2>
         <p class="text-gray-500">
             Er is geen route voor jou gepland voor vandaag. Neem contact op met de admin
@@ -31,34 +31,34 @@
 
     {% else %}
 
-    <!-- Route details -->
+    <!-- Route details vandaag -->
     <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm mb-6">
         <h2 class="text-xl font-semibold text-gray-900 mb-4">
             Route voor {{ today.strftime('%d/%m/%Y') }}
         </h2>
         <div class="space-y-2 text-gray-700">
-            <p><strong>Driver:</strong> {{ route.driver.name }}</p>
+            <p><strong>Driver:</strong> {{ route_today.driver.name }}</p>
             <p><strong>Voertuig:</strong>
-                {% if route.vehicle %}
-                    {{ route.vehicle.license_plate }} ({{ route.vehicle.brand }})
+                {% if route_today.vehicle %}
+                    {{ route_today.vehicle.license_plate }} ({{ route_today.vehicle.brand }})
                 {% else %}
                     Geen voertuig toegewezen
                 {% endif %}
             </p>
-            <p><strong>Status:</strong> {{ route.route_status }}</p>
+            <p><strong>Status:</strong> {{ route_today.route_status }}</p>
         </div>
     </div>
 
-    <!-- Stops / Leveringen -->
-    <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
+    <!-- Levert vandaag -->
+    <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm mb-10">
         <h3 class="text-lg font-semibold mb-4">Stops voor vandaag</h3>
 
-        {% if deliveries|length == 0 %}
+        {% if deliveries_today|length == 0 %}
         <p class="text-gray-500">Geen leveringen toegewezen aan deze route.</p>
 
         {% else %}
         <ul class="space-y-4">
-            {% for d in deliveries %}
+            {% for d in deliveries_today %}
             <li class="p-4 rounded-xl border border-gray-200 bg-gray-50 flex justify-between items-center">
                 <div>
                     <p class="text-gray-900 font-medium">Order #{{ d.order_id }}</p>
@@ -87,5 +87,57 @@
 
     {% endif %}
 
+    <!-- ====================================== -->
+    <!-- ROUTE VOOR MORGEN                      -->
+    <!-- ====================================== -->
+
+    <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm mt-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">
+            Route voor {{ tomorrow.strftime('%d/%m/%Y') }}
+        </h2>
+
+        {% if not route_tomorrow %}
+            <p class="text-gray-500">Nog geen route gepland voor morgen.</p>
+
+        {% else %}
+            <div class="space-y-2 text-gray-700 mb-6">
+                <p><strong>Driver:</strong> {{ route_tomorrow.driver.name }}</p>
+                <p><strong>Voertuig:</strong>
+                    {% if route_tomorrow.vehicle %}
+                        {{ route_tomorrow.vehicle.license_plate }} ({{ route_tomorrow.vehicle.brand }})
+                    {% else %}
+                        Geen voertuig toegewezen
+                    {% endif %}
+                </p>
+                <p><strong>Status:</strong> {{ route_tomorrow.route_status }}</p>
+            </div>
+
+            <h3 class="text-lg font-semibold mb-4">Stops voor morgen</h3>
+
+            {% if deliveries_tomorrow|length == 0 %}
+                <p class="text-gray-500">Geen leveringen toegewezen aan deze route.</p>
+            {% else %}
+                <ul class="space-y-4">
+                    {% for d in deliveries_tomorrow %}
+                    <li class="p-4 rounded-xl border border-gray-200 bg-gray-50 flex justify-between items-center">
+                        <div>
+                            <p class="text-gray-900 font-medium">Order #{{ d.order_id }}</p>
+                            <p class="text-gray-600 text-sm">{{ d.order.delivery_address }}</p>
+                            <p class="text-gray-500 text-xs">
+                                Tijdslot: {{ d.order.delivery_window_start }} — {{ d.order.delivery_window_end }}
+                            </p>
+                        </div>
+
+                        <span class="px-3 py-1 text-sm rounded-lg bg-blue-100 text-blue-700">
+                            gepland
+                        </span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endif %}
+    </div>
+
 </div>
 {% endblock %}
+
