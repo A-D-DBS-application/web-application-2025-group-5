@@ -55,11 +55,19 @@
         </p>
       {% endif %}
 
+      <!-- Toewijzen -->
       <button type="submit"
               class="w-full bg-blue-700 hover:bg-blue-800 text-white font-medium py-2 rounded-lg text-sm">
         Toewijzen aan deze route
       </button>
     </form>
+
+    <!-- ⭐ EXTRA KNOP: TERUG NAAR ROUTES -->
+    <a href="{{ url_for('admin.dashboard') }}#routes"
+       class="w-full block text-center mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 rounded-lg text-sm">
+      Sluiten
+    </a>
+
   </div>
 </div>
 {% endblock %}

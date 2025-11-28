@@ -1,26 +1,36 @@
 <!doctype html>
 <html lang="en">
 <head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>{% block title %}App{% endblock %}</title>
-		<script src="https://cdn.tailwindcss.com"></script>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>{% block title %}App{% endblock %}</title>
+	<script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="antialiased bg-gray-50 text-gray-900">
 
-		{% with messages = get_flashed_messages(with_categories=true) %}
-			{% if messages %}
-				<div class="fixed top-4 right-4 space-y-2 z-50">
-					{% for category, msg in messages %}
-						<div class="px-4 py-2 rounded shadow text-sm bg-white border">
-							{{ msg }}
-						</div>
-					{% endfor %}
-				</div>
-			{% endif %}
-		{% endwith %}
+	{% with messages = get_flashed_messages(with_categories=true) %}
+		{% if messages %}
+			<div class="fixed top-4 right-4 space-y-2 z-50">
+				{% for category, msg in messages %}
+					<div class="px-4 py-2 rounded shadow text-sm bg-white border">
+						{{ msg }}
+					</div>
+				{% endfor %}
+			</div>
+		{% endif %}
+	{% endwith %}
 
-		{% block content %}{% endblock %}
+	{% block content %}{% endblock %}
+
+	<!-- ✅ HIER KOMT JOUW SCRIPT -->
+	<script>
+		function toggleDetails(id) {
+			const el = document.getElementById(id);
+			if (!el) return;
+			el.classList.toggle("hidden");
+		}
+	</script>
 
 </body>
 </html>
