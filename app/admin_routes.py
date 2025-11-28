@@ -218,7 +218,7 @@ def assign_orders(route_id):
     available_orders = (
         Purchase_orders.query
         .filter(
-            db.func.date(Purchase_orders.delivery_window_start) == selected_date,
+            db.func.date(Purchase_orders.delivery_window_end) == selected_date,
             ~Purchase_orders.route_links.any()
         )
         .order_by(Purchase_orders.order_id.asc())

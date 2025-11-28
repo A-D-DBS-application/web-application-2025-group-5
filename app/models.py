@@ -70,7 +70,6 @@ class Customer(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, nullable=False, server_default=db.func.now(), onupdate=db.func.now())
 
-   
     def __repr__(self):
         return f"<Customer {self.customer}>"
 
@@ -111,11 +110,11 @@ class PurchaseOrders(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, nullable=False, server_default=db.func.now(), onupdate=db.func.now())
 
-    customer = relationship("Customer", back_populates="orders")
+    # ✔ jouw originele relatie (GEEN back_populates!)
+    customer = relationship("Customer")
+
     items = relationship("OrderItem", back_populates="order")
     route_links = relationship("RouteDelivery", back_populates="order")
-
-
 
     def __repr__(self):
         return f"<PurchaseOrder {self.order_id}>"
@@ -190,7 +189,7 @@ class RouteDelivery(db.Model):
         return f"<RouteDelivery {self.route_delivery_id}>"
 
 
-# Backwards compatibility alias# Compatibility aliases for old imports
+# Backwards compatibility alias
 User = Users
 Purchase_orders = PurchaseOrders
 Route_Delivery = RouteDelivery

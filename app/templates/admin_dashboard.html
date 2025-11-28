@@ -115,7 +115,7 @@
                 Tel: {{ o.delivery_phone }} | Gewicht: {{ o.total_weight_kg }} kg
               </p>
               <p class="text-sm text-slate-500">
-                Tijdvenster: {{ o.delivery_window_start }} – {{ o.delivery_window_end }}
+                Leverdatum: {{o.delivery_window_end.strftime('%d-%m-%Y') }}
               </p>
             </div>
 
@@ -242,13 +242,14 @@
               <p><strong>Status:</strong> {{ d.order.order_status }}</p>
               <p><strong>Volgorde:</strong> {{ d.sequence }}</p>
               
-              <p><strong>Leveringstijd:</strong>
-                {% if d.order.delivery_window_start and d.order.delivery_window_end %}
-                  {{ d.order.delivery_window_start.strftime('%H:%M') }} -
-                  {{ d.order.delivery_window_end.strftime('%H:%M') }}
-                {% else %}
-                  –
-                {% endif %}
+                <p><strong>Leveringstijd:</strong>
+            {% if d.order.delivery_window_end %}
+              {{ d.order.delivery_window_end.strftime('%H:%M') }}
+            {% else %}
+              –
+            {% endif %}
+        </p>
+
               </p>
 
             </div>
