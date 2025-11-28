@@ -5,7 +5,7 @@
 <div class="min-h-screen bg-gray-50 flex items-center justify-center p-6">
   <div class="bg-white w-full max-w-2xl p-8 rounded-2xl shadow-lg border border-gray-200 relative">
 
-    <!-- Sluit-knop -->
+    <!-- Sluitknop -->
     <a href="{{ url_for('admin.dashboard') }}"
        class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl leading-none">
         &times;
@@ -26,7 +26,7 @@
                class="w-full border border-gray-300 rounded-lg px-3 py-2"
                autocomplete="off">
 
-        <!-- Zoekresultaten dropdown -->
+        <!-- Zoekresultaten -->
         <div id="customer_results"
              class="absolute left-0 right-0 bg-white border border-gray-300 rounded-lg mt-1 hidden z-20 max-h-60 overflow-y-auto">
         </div>
@@ -55,10 +55,23 @@
       <input type="datetime-local" name="delivery_window_end" required
              class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5" />
 
-      <!-- Gewicht -->
-      <label class="block text-sm font-medium text-gray-700 mb-1">Gewicht (kg)</label>
-      <input type="number" name="total_weight_kg" step="0.01"
+      <!-- PRODUCTEN / GEWICHT -->
+      <label class="block text-sm font-medium text-gray-700 mb-1">Aantal vaten (60L – 65 kg)</label>
+      <input type="number" name="qty_vat" min="0"
              class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5" />
+
+      <label class="block text-sm font-medium text-gray-700 mb-1">Aantal flessen (75cl – 1,5 kg)</label>
+      <input type="number" name="qty_fles" min="0"
+             class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5" />
+
+      <label class="block text-sm font-medium text-gray-700 mb-1">Aantal BIBs (3L – 4 kg)</label>
+      <input type="number" name="qty_bib" min="0"
+             class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5" />
+
+      <!-- Automatische berekening, readonly -->
+      <label class="block text-sm font-medium text-gray-700 mb-1">Automatisch Gewicht (kg)</label>
+      <input type="number" id="auto_weight" readonly
+             class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 mb-5" />
 
       <!-- Order Status -->
       <label class="block text-sm font-medium text-gray-700 mb-1">Order Status</label>
@@ -84,8 +97,9 @@
 
     </form>
 
-    <!-- JavaScript: zoekfunctie -->
+    <!-- JavaScript klantzoeker + gewichtberekening -->
     <script>
+      // --- Klantzoeker ---
       const searchInput = document.getElementById("customer_search");
       const resultsBox = document.getElementById("customer_results");
 
@@ -120,7 +134,6 @@
             document.getElementById("delivery_phone").value = c.phone;
 
             searchInput.value = c.name;
-
             resultsBox.classList.add("hidden");
           });
 
@@ -128,16 +141,28 @@
         });
       });
 
-      // Sluit dropdown bij klik buiten
       document.addEventListener("click", (event) => {
         if (!resultsBox.contains(event.target) && event.target !== searchInput) {
           resultsBox.classList.add("hidden");
         }
+      });
+
+      // --- Automatische gewichtsberekening ---
+      function updateWeight() {
+          const vat = parseInt(document.querySelector('[name="qty_vat"]').value || 0);
+          const fles = parseInt(document.querySelector('[name="qty_fles"]').value || 0);
+          const bib = parseInt(document.querySelector('[name="qty_bib"]').value || 0);
+
+          const totaal = vat * 65 + fles * 1.5 + bib * 4;
+          document.getElementById('auto_weight').value = totaal.toFixed(2);
+      }
+
+      ['qty_vat','qty_fles','qty_bib'].forEach(id => {
+          document.querySelector(`[name="${id}"]`).addEventListener('input', updateWeight);
       });
     </script>
 
   </div>
 </div>
 {% endblock %}
-
 

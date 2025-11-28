@@ -1,20 +1,26 @@
 # app/admin_routes.py
 
 from datetime import date, datetime
-from sqlalchemy import or_
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
+from sqlalchemy import or_
 from .models import Route, User, Vehicle, Purchase_orders, Customer, Route_Delivery
 from . import db
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
+
+# -----------------------------
+#  Helper: Check admin role
+# -----------------------------
 def require_admin():
     if session.get("role") != "admin":
         flash("Je hebt geen toegang tot dit gedeelte.", "error")
         return False
     return True
+
+
 # -----------------------------
-#  Helper: Check admin role
+#  Dashboard
 # -----------------------------
 @admin_bp.route("/dashboard")
 def dashboard():
@@ -23,42 +29,11 @@ def dashboard():
 
     today = date.today()
 
-    # ===========================
-    # ROUTE FILTER (op datum)
-    # ===========================
-    route_date_str = request.args.get("route_date")
-    selected_route_date = None
-
-    if route_date_str:
-        try:
-            selected_route_date = datetime.strptime(route_date_str, "%Y-%m-%d").date()
-        except ValueError:
-            selected_route_date = None
-
-    # ===========================
-    # ROUTES OPHALEN
-    # - Filter indien datum geselecteerd
-    # - Altijd oplopend sorteren (oud -> nieuw)
-    # ===========================
-    if selected_route_date:
-        routes = (
-            Route.query
-            .filter(Route.route_date == selected_route_date)
-            .order_by(Route.route_date.asc())
-            .all()
-        )
-    else:
-        routes = Route.query.order_by(Route.route_date.asc()).all()
-
-    # ===========================
-    # DRIVERS & VEHICLES
-    # ===========================
+    routes = Route.query.order_by(Route.route_date.desc()).all()
     drivers = User.query.filter_by(role="driver", is_active=True).all()
     vehicles = Vehicle.query.filter_by(is_active=True).all()
 
-    # ===========================
     # ORDER SEARCH
-    # ===========================
     search_raw = request.args.get("q")
     search = (search_raw or "").strip()
 
@@ -96,16 +71,10 @@ def dashboard():
     else:
         orders = Purchase_orders.query.order_by(Purchase_orders.created_at.desc()).all()
 
-    # ===========================
-    # COUNTERS
-    # ===========================
     total_orders = Purchase_orders.query.count()
     pending_orders = Purchase_orders.query.filter_by(order_status="pending").count()
     active_routes = Route.query.filter(Route.route_status != "completed").count()
 
-    # ===========================
-    # TEMPLATE RENDER
-    # ===========================
     return render_template(
         "admin_dashboard.html",
         today=today,
@@ -116,8 +85,8 @@ def dashboard():
         total_orders=total_orders,
         pending_orders=pending_orders,
         active_routes=active_routes,
-        selected_route_date=selected_route_date,
     )
+
 
 # -----------------------------
 #  NIEUWE ROUTE AANMAKEN
@@ -157,6 +126,53 @@ def create_route():
 
 
 # -----------------------------
+#  NIEUWE ORDER AANMAKEN
+# -----------------------------
+@admin_bp.route("/orders/new", methods=["GET", "POST"])
+def create_order():
+    if not require_admin():
+        return redirect(url_for("auth.login"))
+
+    if request.method == "POST":
+        customer_id = request.form.get("customer_id")
+        delivery_address = request.form.get("delivery_address")
+        delivery_phone = request.form.get("delivery_phone")
+        start_time = request.form.get("delivery_window_start")
+        end_time = request.form.get("delivery_window_end")
+
+        qty_vat = int(request.form.get("qty_vat") or 0)
+        qty_fles = int(request.form.get("qty_fles") or 0)
+        qty_bib = int(request.form.get("qty_bib") or 0)
+
+        # Automatische serverberekening gewicht
+        total_weight = qty_vat * 65 + qty_fles * 1.5 + qty_bib * 4
+
+        status = request.form.get("order_status")
+        payment = request.form.get("payment_status")
+
+        order = Purchase_orders(
+            customer_id=customer_id,
+            delivery_address=delivery_address,
+            delivery_phone=delivery_phone,
+            delivery_window_start=start_time,
+            delivery_window_end=end_time,
+            total_weight_kg=total_weight,
+            order_status=status,
+            payment_status=payment,
+            created_at=date.today(),
+            updated_at=date.today(),
+        )
+
+        db.session.add(order)
+        db.session.commit()
+
+        flash("Nieuwe order toegevoegd!", "success")
+        return redirect(url_for("admin.dashboard"))
+
+    return render_template("order_create.html")
+
+
+# -----------------------------
 #  BESTELLINGEN TOEWIJZEN AAN ROUTE
 # -----------------------------
 @admin_bp.route("/routes/<int:route_id>/assign", methods=["GET", "POST"])
@@ -168,6 +184,7 @@ def assign_orders(route_id):
 
     if request.method == "POST":
         order_ids = request.form.getlist("order_ids")
+
         if not order_ids:
             flash("Selecteer minstens één bestelling om toe te wijzen.", "error")
             return redirect(url_for("admin.assign_orders", route_id=route_id))
@@ -227,6 +244,7 @@ def delete_route(route_id):
     route = Route.query.get_or_404(route_id)
 
     Route_Delivery.query.filter_by(route_id=route.route_id).delete()
+
     db.session.delete(route)
     db.session.commit()
 
@@ -242,7 +260,7 @@ def search_customers():
     if not require_admin():
         return jsonify([])
 
-    q = request.args.get("q", "").strip()
+    q = request.args.get("q", "").trim()
     if not q:
         return jsonify([])
 
@@ -322,7 +340,7 @@ def create_user():
         new_user = User(
             name=name,
             email=email,
-            password_hash="",
+            password_hash="",  
             role=role,
             is_active=True
         )
@@ -334,34 +352,4 @@ def create_user():
         return redirect(url_for("admin.dashboard"))
 
     return render_template("user_create.html")
-
-@admin_bp.route("/orders/new", methods=["GET", "POST"])
-def create_order():
-    if not require_admin():
-        return redirect(url_for("auth.login"))
-
-    if request.method == "POST":
-        customer_id = request.form.get("customer_id")
-        start_time = request.form.get("delivery_window_start")
-        end_time = request.form.get("delivery_window_end")
-        weight = request.form.get("total_weight_kg")
-        status = request.form.get("order_status")
-        payment = request.form.get("payment_status")
-
-        order = Purchase_orders(
-            customer_id=customer_id,
-            delivery_window_start=start_time,
-            delivery_window_end=end_time,
-            total_weight_kg=weight,
-            order_status=status,
-            payment_status=payment
-        )
-
-        db.session.add(order)
-        db.session.commit()
-
-        flash("Nieuwe order toegevoegd!", "success")
-        return redirect(url_for("admin.dashboard"))
-
-    return render_template("order_create.html")
 
