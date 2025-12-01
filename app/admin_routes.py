@@ -20,7 +20,7 @@ def require_admin():
 
 
 # -------------------------------------------
-#  DASHBOARD
+#  DASHBOARD MET DATUMFILTER + ZOEKFUNCTIE
 # -------------------------------------------
 @admin_bp.route("/dashboard")
 def dashboard():
@@ -29,10 +29,28 @@ def dashboard():
 
     today = date.today()
 
-    routes = Route.query.order_by(Route.route_date.desc()).all()
+    # -------------------------------------------
+    # ROUTE DATUMFILTER
+    # -------------------------------------------
+    selected_route_date = request.args.get("route_date")
+    routes_query = Route.query.order_by(Route.route_date.desc())
+
+    date_obj = None
+    if selected_route_date:
+        try:
+            date_obj = datetime.strptime(selected_route_date, "%Y-%m-%d").date()
+            routes_query = routes_query.filter(Route.route_date == date_obj)
+        except ValueError:
+            pass
+
+    routes = routes_query.all()
+
     drivers = User.query.filter_by(role="driver", is_active=True).all()
     vehicles = Vehicle.query.filter_by(is_active=True).all()
 
+    # -------------------------------------------
+    # ORDER ZOEKFILTER
+    # -------------------------------------------
     search_raw = request.args.get("q")
     search = (search_raw or "").strip()
 
@@ -55,8 +73,10 @@ def dashboard():
 
         if search.isdigit():
             num = int(search)
-            filters.append(Purchase_orders.order_id == num)
-            filters.append(Purchase_orders.total_weight_kg == num)
+            filters += [
+                Purchase_orders.order_id == num,
+                Purchase_orders.total_weight_kg == num,
+            ]
         else:
             filters.append(Purchase_orders.order_id.cast(db.Text).ilike(pattern))
 
@@ -70,6 +90,9 @@ def dashboard():
     else:
         orders = Purchase_orders.query.order_by(Purchase_orders.created_at.desc()).all()
 
+    # -------------------------------------------
+    # RENDER DASHBOARD
+    # -------------------------------------------
     return render_template(
         "admin_dashboard.html",
         today=today,
@@ -80,6 +103,7 @@ def dashboard():
         total_orders=Purchase_orders.query.count(),
         pending_orders=Purchase_orders.query.filter_by(order_status="pending").count(),
         active_routes=Route.query.filter(Route.route_status != "completed").count(),
+        selected_route_date=date_obj,   # <-- BELANGRIJK!
     )
 
 
@@ -133,7 +157,6 @@ def create_order():
         customer_id = request.form.get("customer_id")
         delivery_address = request.form.get("delivery_address")
         delivery_phone = request.form.get("delivery_phone")
-
         start_time = request.form.get("delivery_window_start")
         end_time = request.form.get("delivery_window_end")
 
@@ -143,9 +166,6 @@ def create_order():
 
         total_weight = qty_vat * 65 + qty_fles * 1.5 + qty_bib * 4
 
-        status = request.form.get("order_status")
-        payment = request.form.get("payment_status")
-
         order = Purchase_orders(
             customer_id=customer_id,
             delivery_address=delivery_address,
@@ -153,8 +173,8 @@ def create_order():
             delivery_window_start=start_time,
             delivery_window_end=end_time,
             total_weight_kg=total_weight,
-            order_status=status,
-            payment_status=payment,
+            order_status=request.form.get("order_status"),
+            payment_status=request.form.get("payment_status"),
             created_at=date.today(),
             updated_at=date.today(),
         )
@@ -197,8 +217,7 @@ def assign_orders(route_id):
             db.session.add(delivery)
 
         db.session.commit()
-
-        flash("Bestellingen toegewezen aan route!", "success")
+        flash("Bestellingen toegewezen!", "success")
         return redirect(url_for("admin.dashboard"))
 
     delivery_date = request.args.get("delivery_date")
@@ -237,12 +256,10 @@ def delete_route(route_id):
     if not require_admin():
         return redirect(url_for("auth.login"))
 
-    route = Route.query.get_or_404(route_id)
+    Route_Delivery.query.filter_by(route_id=route_id).delete()
+    Route.query.filter_by(route_id=route_id).delete()
 
-    Route_Delivery.query.filter_by(route_id=route.route_id).delete()
-    db.session.delete(route)
     db.session.commit()
-
     flash("Route verwijderd.", "success")
     return redirect(url_for("admin.dashboard"))
 
@@ -255,7 +272,7 @@ def search_customers():
     if not require_admin():
         return jsonify([])
 
-    q = request.args.get("q", "").strip()    # FIX HIER
+    q = request.args.get("q", "").strip()
     if not q:
         return jsonify([])
 
