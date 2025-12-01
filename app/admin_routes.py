@@ -9,9 +9,9 @@ from . import db
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
 
-# -----------------------------
-#  Helper: Check admin role
-# -----------------------------
+# -------------------------------------------
+#  Protect admin routes
+# -------------------------------------------
 def require_admin():
     if session.get("role") != "admin":
         flash("Je hebt geen toegang tot dit gedeelte.", "error")
@@ -19,9 +19,9 @@ def require_admin():
     return True
 
 
-# -----------------------------
-#  Dashboard
-# -----------------------------
+# -------------------------------------------
+#  DASHBOARD
+# -------------------------------------------
 @admin_bp.route("/dashboard")
 def dashboard():
     if not require_admin():
@@ -33,7 +33,6 @@ def dashboard():
     drivers = User.query.filter_by(role="driver", is_active=True).all()
     vehicles = Vehicle.query.filter_by(is_active=True).all()
 
-    # ORDER SEARCH
     search_raw = request.args.get("q")
     search = (search_raw or "").strip()
 
@@ -41,17 +40,17 @@ def dashboard():
         return redirect(url_for("admin.dashboard"))
 
     if search:
-        search_pattern = f"%{search}%"
+        pattern = f"%{search}%"
 
         filters = [
-            Purchase_orders.delivery_address.ilike(search_pattern),
-            Purchase_orders.delivery_phone.ilike(search_pattern),
-            Purchase_orders.order_status.ilike(search_pattern),
-            Purchase_orders.payment_status.ilike(search_pattern),
-            Customer.first_name.ilike(search_pattern),
-            Customer.last_name.ilike(search_pattern),
-            Customer.customer.ilike(search_pattern),
-            Customer.street_number.ilike(search_pattern),
+            Purchase_orders.delivery_address.ilike(pattern),
+            Purchase_orders.delivery_phone.ilike(pattern),
+            Purchase_orders.order_status.ilike(pattern),
+            Purchase_orders.payment_status.ilike(pattern),
+            Customer.first_name.ilike(pattern),
+            Customer.last_name.ilike(pattern),
+            Customer.customer.ilike(pattern),
+            Customer.street_number.ilike(pattern),
         ]
 
         if search.isdigit():
@@ -59,7 +58,7 @@ def dashboard():
             filters.append(Purchase_orders.order_id == num)
             filters.append(Purchase_orders.total_weight_kg == num)
         else:
-            filters.append(Purchase_orders.order_id.cast(db.Text).ilike(search_pattern))
+            filters.append(Purchase_orders.order_id.cast(db.Text).ilike(pattern))
 
         orders = (
             Purchase_orders.query
@@ -71,10 +70,6 @@ def dashboard():
     else:
         orders = Purchase_orders.query.order_by(Purchase_orders.created_at.desc()).all()
 
-    total_orders = Purchase_orders.query.count()
-    pending_orders = Purchase_orders.query.filter_by(order_status="pending").count()
-    active_routes = Route.query.filter(Route.route_status != "completed").count()
-
     return render_template(
         "admin_dashboard.html",
         today=today,
@@ -82,15 +77,15 @@ def dashboard():
         drivers=drivers,
         vehicles=vehicles,
         orders=orders,
-        total_orders=total_orders,
-        pending_orders=pending_orders,
-        active_routes=active_routes,
+        total_orders=Purchase_orders.query.count(),
+        pending_orders=Purchase_orders.query.filter_by(order_status="pending").count(),
+        active_routes=Route.query.filter(Route.route_status != "completed").count(),
     )
 
 
-# -----------------------------
-#  NIEUWE ROUTE AANMAKEN
-# -----------------------------
+# -------------------------------------------
+#  ROUTE AANMAKEN
+# -------------------------------------------
 @admin_bp.route("/routes/new", methods=["GET", "POST"])
 def create_route():
     if not require_admin():
@@ -107,7 +102,7 @@ def create_route():
 
         route = Route(
             driver_id=driver_id,
-            vehicle_id=vehicle_id if vehicle_id else None,
+            vehicle_id=vehicle_id or None,
             created_by_user_id=session["user_id"],
             route_date=route_date,
             route_status="planned",
@@ -119,15 +114,16 @@ def create_route():
         flash("Route succesvol aangemaakt!", "success")
         return redirect(url_for("admin.dashboard"))
 
-    drivers = User.query.filter_by(role="driver", is_active=True).all()
-    vehicles = Vehicle.query.filter_by(is_active=True).all()
+    return render_template(
+        "route_create.html",
+        drivers=User.query.filter_by(role="driver", is_active=True).all(),
+        vehicles=Vehicle.query.filter_by(is_active=True).all(),
+    )
 
-    return render_template("route_create.html", drivers=drivers, vehicles=vehicles)
 
-
-# -----------------------------
-#  NIEUWE ORDER AANMAKEN
-# -----------------------------
+# -------------------------------------------
+#  ORDER AANMAKEN
+# -------------------------------------------
 @admin_bp.route("/orders/new", methods=["GET", "POST"])
 def create_order():
     if not require_admin():
@@ -137,6 +133,7 @@ def create_order():
         customer_id = request.form.get("customer_id")
         delivery_address = request.form.get("delivery_address")
         delivery_phone = request.form.get("delivery_phone")
+
         start_time = request.form.get("delivery_window_start")
         end_time = request.form.get("delivery_window_end")
 
@@ -144,7 +141,6 @@ def create_order():
         qty_fles = int(request.form.get("qty_fles") or 0)
         qty_bib = int(request.form.get("qty_bib") or 0)
 
-        # Automatische serverberekening gewicht
         total_weight = qty_vat * 65 + qty_fles * 1.5 + qty_bib * 4
 
         status = request.form.get("order_status")
@@ -172,9 +168,9 @@ def create_order():
     return render_template("order_create.html")
 
 
-# -----------------------------
-#  BESTELLINGEN TOEWIJZEN AAN ROUTE
-# -----------------------------
+# -------------------------------------------
+#  ORDERS TOEWIJZEN AAN ROUTE
+# -------------------------------------------
 @admin_bp.route("/routes/<int:route_id>/assign", methods=["GET", "POST"])
 def assign_orders(route_id):
     if not require_admin():
@@ -186,30 +182,30 @@ def assign_orders(route_id):
         order_ids = request.form.getlist("order_ids")
 
         if not order_ids:
-            flash("Selecteer minstens één bestelling om toe te wijzen.", "error")
+            flash("Selecteer minstens één bestelling.", "error")
             return redirect(url_for("admin.assign_orders", route_id=route_id))
 
-        current_max_seq = 0
-        if route.deliveries:
-            current_max_seq = max(d.sequence for d in route.deliveries)
+        current_max = max([d.sequence for d in route.deliveries], default=0)
 
         for idx, oid in enumerate(order_ids, start=1):
             delivery = Route_Delivery(
                 route_id=route.route_id,
                 order_id=int(oid),
-                sequence=current_max_seq + idx,
+                sequence=current_max + idx,
                 delivery_status="planned",
             )
             db.session.add(delivery)
 
         db.session.commit()
-        flash("Bestellingen succesvol aan de route toegewezen!", "success")
+
+        flash("Bestellingen toegewezen aan route!", "success")
         return redirect(url_for("admin.dashboard"))
 
-    delivery_date_str = request.args.get("delivery_date")
-    if delivery_date_str:
+    delivery_date = request.args.get("delivery_date")
+
+    if delivery_date:
         try:
-            selected_date = datetime.strptime(delivery_date_str, "%Y-%m-%d").date()
+            selected_date = datetime.strptime(delivery_date, "%Y-%m-%d").date()
         except ValueError:
             selected_date = route.route_date
     else:
@@ -233,9 +229,9 @@ def assign_orders(route_id):
     )
 
 
-# -----------------------------
+# -------------------------------------------
 #  ROUTE VERWIJDEREN
-# -----------------------------
+# -------------------------------------------
 @admin_bp.route("/routes/<int:route_id>/delete", methods=["POST"])
 def delete_route(route_id):
     if not require_admin():
@@ -244,23 +240,22 @@ def delete_route(route_id):
     route = Route.query.get_or_404(route_id)
 
     Route_Delivery.query.filter_by(route_id=route.route_id).delete()
-
     db.session.delete(route)
     db.session.commit()
 
-    flash("Route succesvol verwijderd.", "success")
+    flash("Route verwijderd.", "success")
     return redirect(url_for("admin.dashboard"))
 
 
-# -----------------------------
+# -------------------------------------------
 #  KLANT ZOEKFUNCTIE (AJAX)
-# -----------------------------
+# -------------------------------------------
 @admin_bp.route("/customers/search")
 def search_customers():
     if not require_admin():
         return jsonify([])
 
-    q = request.args.get("q", "").trim()
+    q = request.args.get("q", "").strip()    # FIX HIER
     if not q:
         return jsonify([])
 
@@ -268,7 +263,7 @@ def search_customers():
         or_(
             Customer.customer.ilike(f"%{q}%"),
             Customer.first_name.ilike(f"%{q}%"),
-            Customer.last_name.ilike(f"%{q}%")
+            Customer.last_name.ilike(f"%{q}%"),
         )
     ).limit(10).all()
 
@@ -278,51 +273,43 @@ def search_customers():
             "name": f"{(c.first_name or '').strip()} {(c.last_name or '').strip()}".strip(),
             "customer": c.customer,
             "address": f"{c.street_number}, {c.postal_code} {c.city}",
-            "phone": c.phone or c.celphone
+            "phone": c.phone or c.celphone,
         }
         for c in customers
     ])
 
 
-# -----------------------------
-#  NIEUW VOERTUIG AANMAKEN
-# -----------------------------
+# -------------------------------------------
+#  NIEUW VOERTUIG
+# -------------------------------------------
 @admin_bp.route("/vehicles/new", methods=["GET", "POST"])
 def create_vehicle():
     if not require_admin():
         return redirect(url_for("auth.login"))
 
     if request.method == "POST":
-        license_plate = request.form.get("license_plate")
-        brand = request.form.get("brand")
-        model = request.form.get("model")
-        capacity = request.form.get("capacity_kg")
-        fuel_type = request.form.get("fuel_type")
-        color = request.form.get("color")
-        is_active = request.form.get("is_active") == "on"
-
         vehicle = Vehicle(
-            license_plate=license_plate,
-            brand=brand,
-            model=model,
-            color=color,
-            capacity_kg=capacity,
-            fuel_type=fuel_type,
-            is_active=is_active,
+            license_plate=request.form.get("license_plate"),
+            brand=request.form.get("brand"),
+            model=request.form.get("model"),
+            color=request.form.get("color"),
+            capacity_kg=request.form.get("capacity_kg"),
+            fuel_type=request.form.get("fuel_type"),
+            is_active=(request.form.get("is_active") == "on"),
         )
 
         db.session.add(vehicle)
         db.session.commit()
 
-        flash("Voertuig succesvol toegevoegd!", "success")
+        flash("Voertuig toegevoegd!", "success")
         return redirect(url_for("admin.dashboard"))
 
     return render_template("vehicle_create.html")
 
 
-# -----------------------------
-#  NIEUW ACCOUNT AANMAKEN
-# -----------------------------
+# -------------------------------------------
+#  NIEUWE USER
+# -------------------------------------------
 @admin_bp.route("/users/new", methods=["GET", "POST"])
 def create_user():
     if not require_admin():
@@ -334,22 +321,21 @@ def create_user():
         role = request.form.get("role")
 
         if not name or not email or not role:
-            flash("Alle verplichte velden moeten ingevuld zijn.", "error")
+            flash("Alle velden verplicht.", "error")
             return redirect(url_for("admin.create_user"))
 
-        new_user = User(
+        user = User(
             name=name,
             email=email,
-            password_hash="",  
+            password_hash="",
             role=role,
-            is_active=True
+            is_active=True,
         )
 
-        db.session.add(new_user)
+        db.session.add(user)
         db.session.commit()
 
-        flash("Nieuw account succesvol aangemaakt!", "success")
+        flash("Gebruiker aangemaakt!", "success")
         return redirect(url_for("admin.dashboard"))
 
     return render_template("user_create.html")
-
