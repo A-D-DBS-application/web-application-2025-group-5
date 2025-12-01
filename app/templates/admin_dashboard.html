@@ -109,10 +109,11 @@
             <div class="space-y-1">
               <p class="font-semibold text-slate-900">Order #{{ o.order_id }}</p>
               <p class="text-sm text-slate-500">
-                Klant: {{ o.customer.first_name }} {{ o.customer.last_name }} – {{ o.delivery_address }}
+                Klant: {{ o.customer.customer }} – 
+                {{ o.customer.street_number }}, {{ o.customer.postal_code }} {{ o.customer.city }}
               </p>
               <p class="text-sm text-slate-500">
-                Tel: {{ o.delivery_phone }} | Gewicht: {{ o.total_weight_kg }} kg
+                Tel: {{ o.customer.celphone or o.customer.phone }} | Gewicht: {{ o.total_weight_kg }} kg
               </p>
               <p class="text-sm text-slate-500">
                 Leverdatum: {{o.delivery_window_end.strftime('%d-%m-%Y') }}
