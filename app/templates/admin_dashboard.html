@@ -249,15 +249,15 @@
 
               <!-- ✔ ÉCHTE CIJFERS — 0 blijft 0 -->
               <p><strong>Aantal flessen:</strong>
-                {{ d.order.number_of_bottles if d.order.number_of_bottles is not none else 0 }}
+                {{ d.order.number_of_bottles if d.order.qty_fles is not none else 0 }}
               </p>
 
               <p><strong>Aantal vaten:</strong>
-                {{ d.order.number_of_barrels if d.order.number_of_barrels is not none else 0 }}
+                {{ d.order.number_of_barrels if d.order.qty_vat is not none else 0 }}
               </p>
 
               <p><strong>Aantal BiBs:</strong>
-                {{ d.order.number_of_bibs if d.order.number_of_bibs is not none else 0 }}
+                {{ d.order.number_of_bibs if d.order.qty.bib is not none else 0 }}
               </p>
 
               <p><strong>Status:</strong> {{ d.order.order_status }}</p>
