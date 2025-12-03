@@ -111,7 +111,7 @@ class PurchaseOrders(db.Model):
     number_of_barrels = db.Column(db.Integer)
     number_of_bibs = db.Column(db.Integer)
     order_status = db.Column(db.Text, nullable=False)
-    qty_vat = db.Column( db.Integer,nullebale=False, default=0)
+    qty_vat = db.Column( db.Integer,nullable=False, default=0)
     qty_fles = db.Column(db.Integer, nullable=False, default=0)
     qty_bib = db.Column(db.Integer, nullable=False, default=0)
     created_at = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
