@@ -193,9 +193,20 @@
             Voertuig: {{ r.vehicle.license_plate if r.vehicle else "–" }}
           </p>
 
-          <p class="text-sm text-gray-500">
-            Status: {{ r.route_status }}
+          <p class="text-sm">
+            Status:
+            <span class="
+              px-2 py-1 rounded-full text-xs
+              {% if r.route_status.lower() == 'planned' %}
+                bg-green-100 text-green-700
+              {% else %}
+                bg-slate-100 text-slate-600
+              {% endif %}
+            ">
+              {{ r.route_status }}
+            </span>
           </p>
+
         </div>
 
         <div class="flex gap-2">
