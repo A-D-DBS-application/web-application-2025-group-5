@@ -84,7 +84,7 @@
             <h2 class="text-lg font-semibold text-slate-900">Orders</h2>
             <p class="text-sm text-slate-500">Beheer bestellingen</p>
           </div>
-
+          
           <div class="flex items-center gap-3">
 
             <!-- Zoekveld -->
@@ -115,6 +115,10 @@
               <p class="text-sm text-slate-500">
                 Tel: {{ o.customer.celphone or o.customer.phone }} | Gewicht: {{ o.total_weight_kg }} kg
               </p>
+              <p class="text-sm text-slate-500">
+                Vaten: {{ o.qty_vat }} | Flessen: {{ o.qty_fles }} | BIBs: {{ o.qty_bib }}
+              </p>
+
               <p class="text-sm text-slate-500">
                 Leverdatum: {{o.delivery_window_end.strftime('%d-%m-%Y') }}
               </p>
