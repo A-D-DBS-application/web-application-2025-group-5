@@ -97,7 +97,8 @@ class Product(db.Model):
 # -----------------------------------------------------
 class PurchaseOrders(db.Model):
     __tablename__ = "purchase_orders"
-
+    delivery_hour_start = db.Column(db.Time, nullable=True)
+    delivery_hour_end = db.Column(db.Time, nullable=True)  
     order_id = db.Column(db.BigInteger, primary_key=True)
     payment_status = db.Column(db.Text, nullable=False)
     delivery_address = db.Column(db.Text, nullable=False)

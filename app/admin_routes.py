@@ -157,9 +157,12 @@ def create_order():
         customer_id = request.form.get("customer_id")
         delivery_address = request.form.get("delivery_address")
         delivery_phone = request.form.get("delivery_phone")
-        start_time = request.form.get("delivery_window_start")
-        end_time = request.form.get("delivery_window_end")
-
+        start_date = request.form.get("delivery_window_start")
+        end_date = request.form.get("delivery_window_end")
+        hour_start = request.form.get("delivery_hour_start") or "08:00"
+        hour_end = request.form.get("delivery_hour_end") or "17:00"
+        hour_start_obj = datetime.strptime(hour_start, "%H:%M").time()
+        hour_end_obj = datetime.strptime(hour_end, "%H:%M").time()
         qty_vat = int(request.form.get("qty_vat") or 0)
         qty_fles = int(request.form.get("qty_fles") or 0)
         qty_bib = int(request.form.get("qty_bib") or 0)
@@ -170,8 +173,10 @@ def create_order():
             customer_id=customer_id,
             delivery_address=delivery_address,
             delivery_phone=delivery_phone,
-            delivery_window_start=start_time,
-            delivery_window_end=end_time,
+            delivery_window_start=start_date,
+            delivery_window_end=end_date,
+            delivery_hour_start=hour_start_obj,
+            delivery_hour_end=hour_end_obj,
             total_weight_kg=total_weight,
             order_status=request.form.get("order_status"),
             payment_status=request.form.get("payment_status"),
