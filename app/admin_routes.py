@@ -175,6 +175,11 @@ def create_order():
             total_weight_kg=total_weight,
             order_status=request.form.get("order_status"),
             payment_status=request.form.get("payment_status"),
+
+            number_of_barrels=qty_vat,
+            number_of_bottles=qty_fles,
+            number_of_bibs=qty_bib,
+
             created_at=date.today(),
             updated_at=date.today(),
         )
