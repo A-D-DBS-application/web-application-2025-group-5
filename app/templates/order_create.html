@@ -45,14 +45,26 @@
       <input type="text" id="delivery_phone" name="delivery_phone" required
              class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5" />
 
-      <!-- Tijdvenster Start -->
-      <label class="block text-sm font-medium text-gray-700 mb-1">Start Tijdvenster *</label>
-      <input type="datetime-local" name="delivery_window_start" required
+      <!-- startdatum leveren -->
+      <label class="block text-sm font-medium text-gray-700 mb-1">Eerste mogelijke leverdatum *</label>
+      <input type="date" name="delivery_window_start" required
+            value="{{default_date}}"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5" />
+
+      <!-- uiterste leverdatum -->
+      <label class="block text-sm font-medium text-gray-700 mb-1">Uiterste leverdatum *</label>
+      <input type="date" name="delivery_window_end" required
+             class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5" />
+      <!-- Levering vanaf (uur) -->
+      <label class="block text-sm font-medium text-gray-700 mb-1">Levering vanaf (uur)</label>
+      <input type="time" name="delivery_hour_start"
+             value="08:00"
              class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5" />
 
-      <!-- Tijdvenster Eind -->
-      <label class="block text-sm font-medium text-gray-700 mb-1">Eind Tijdvenster *</label>
-      <input type="datetime-local" name="delivery_window_end" required
+      <!-- Levering tot (uur) -->
+      <label class="block text-sm font-medium text-gray-700 mb-1">Levering tot (uur)</label>
+      <input type="time" name="delivery_hour_end"
+             value="17:00"
              class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5" />
 
       <!-- PRODUCTEN / GEWICHT -->
