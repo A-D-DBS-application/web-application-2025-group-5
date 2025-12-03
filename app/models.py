@@ -98,7 +98,7 @@ class Product(db.Model):
 class PurchaseOrders(db.Model):
     __tablename__ = "purchase_orders"
     delivery_hour_start = db.Column(db.Time, nullable=True)
-    delivery_hour_end = db.Column(db.Time, nullable=True)  
+    delivery_hour_end = db.Column(db.Time, nullable=True)
     order_id = db.Column(db.BigInteger, primary_key=True)
     payment_status = db.Column(db.Text, nullable=False)
     delivery_address = db.Column(db.Text, nullable=False)
@@ -111,6 +111,9 @@ class PurchaseOrders(db.Model):
     qty_vat = db.Column(db.Integer)
     qty_bib = db.Column(db.Integer)
     order_status = db.Column(db.Text, nullable=False)
+    qty_vat = db.Column( db.Integer,nullable=False, default=0)
+    qty_fles = db.Column(db.Integer, nullable=False, default=0)
+    qty_bib = db.Column(db.Integer, nullable=False, default=0)
     created_at = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, nullable=False, server_default=db.func.now(), onupdate=db.func.now())
 
