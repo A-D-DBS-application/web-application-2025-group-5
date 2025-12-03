@@ -76,7 +76,7 @@
     <!-- Tab content container -->
     <div class="p-6 space-y-6">
 
-      <!-- Orders tab (hidden by default) -->
+      <!-- Orders tab -->
       <section id="tab-orders" class="tab-pane hidden">
 
         <div class="flex items-center justify-between mb-4">
@@ -84,10 +84,8 @@
             <h2 class="text-lg font-semibold text-slate-900">Orders</h2>
             <p class="text-sm text-slate-500">Beheer bestellingen</p>
           </div>
-
+          
           <div class="flex items-center gap-3">
-
-            <!-- Zoekveld -->
             <form method="get" action="{{ url_for('admin.dashboard') }}">
               <input type="text" name="q"
                      placeholder="Zoek op klant, telefoon, adres, gewicht..."
@@ -109,12 +107,17 @@
             <div class="space-y-1">
               <p class="font-semibold text-slate-900">Order #{{ o.order_id }}</p>
               <p class="text-sm text-slate-500">
-                Klant: {{ o.customer.customer }} – 
+                Klant: {{ o.customer.customer }} –
                 {{ o.customer.street_number }}, {{ o.customer.postal_code }} {{ o.customer.city }}
               </p>
               <p class="text-sm text-slate-500">
-                Tel: {{ o.customer.celphone or o.customer.phone }} | Gewicht: {{ o.total_weight_kg }} kg
+                Tel: {{ o.customer.celphone or o.customer.phone }} |
+                Gewicht: {{ o.total_weight_kg }} kg
               </p>
+              <p class="text-sm text-slate-500">
+                Vaten: {{ o.qty_vat }} | Flessen: {{ o.qty_fles }} | BIBs: {{ o.qty_bib }}
+              </p>
+
               <p class="text-sm text-slate-500">
                 Leverdatum: {{o.delivery_window_end.strftime('%d-%m-%Y') }}
               </p>
@@ -132,12 +135,13 @@
           {% endfor %}
         </div>
         {% else %}
-          <p class="text-center text-slate-400 py-10">Nog geen orders.</p>
+        <p class="text-center text-slate-400 py-10">Nog geen orders.</p>
         {% endif %}
 
       </section>
 
-      <!-- ROUTES TAB -->
+
+<!-- ROUTES TAB -->
 <section id="tab-routes" class="tab-pane">
 
   <div class="flex items-center justify-between mb-4">
@@ -152,59 +156,54 @@
     </a>
   </div>
 
-  <!-- ⭐ ENIGE JUISTE FILTER OP DATUM ⭐ -->
+  <!-- Filter -->
   <form method="get" action="{{ url_for('admin.dashboard') }}" class="mb-6 flex items-end gap-3">
+    <div>
+      <label class="text-sm font-medium text-slate-600 mb-1 block">
+        Filter op datum:
+      </label>
+      <input type="date" name="route_date"
+             value="{{ selected_route_date.isoformat() if selected_route_date }}"
+             class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
+    </div>
 
-      <div>
-          <label class="text-sm font-medium text-slate-600 mb-1 block">
-            Filter op datum:
-          </label>
-          <input type="date"
-                 name="route_date"
-                 value="{{ selected_route_date.isoformat() if selected_route_date }}"
-                 class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
-      </div>
+    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">Filter</button>
 
-      <button class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
-          Filter
-      </button>
-
-      {% if selected_route_date %}
-      <a href="{{ url_for('admin.dashboard') }}"
-         class="px-4 py-2 rounded-lg text-sm bg-gray-200 text-gray-700 hover:bg-gray-300">
-          Reset
-      </a>
-      {% endif %}
+    {% if selected_route_date %}
+    <a href="{{ url_for('admin.dashboard') }}"
+       class="px-4 py-2 rounded-lg text-sm bg-gray-200 text-gray-700 hover:bg-gray-300">
+      Reset
+    </a>
+    {% endif %}
   </form>
-  <!-- ⭐ EINDE FILTER ⭐ -->
 
   {% if routes %}
     {% for r in routes %}
     <div class="bg-white border border-gray-200 rounded-xl p-4 mb-3 shadow-sm">
 
-      <!-- ROUTE HEADER -->
+      <!-- HEADER -->
       <div class="flex justify-between items-start">
         <div>
           <p class="font-semibold text-gray-900">
             {{ r.route_date.strftime('%d/%m/%Y') }} – {{ r.driver.name }}
           </p>
-
           <p class="text-sm text-gray-500">
             Voertuig: {{ r.vehicle.license_plate if r.vehicle else "–" }}
           </p>
+<p class="text-sm text-gray-500">
+  Status:
+  <span class="
+    px-2 py-1 rounded-full text-xs
+    {% if r.route_status.lower() == 'planned' %}
+      bg-green-100 text-green-700
+    {% else %}
+      bg-slate-100 text-slate-600
+    {% endif %}
+  ">
+    {{ r.route_status }}
+  </span>
+</p>
 
-          <p class="text-sm">
-            Status:
-            <span class="
-              px-2 py-1 rounded-full text-xs
-              {% if r.route_status.lower() == 'planned' %}
-                bg-green-100 text-green-700
-              {% else %}
-                bg-slate-100 text-slate-600
-              {% endif %}
-            ">
-              {{ r.route_status }}
-            </span>
           </p>
 
         </div>
@@ -215,26 +214,22 @@
             Bestellingen toewijzen
           </a>
 
-          <form 
-            action="{{ url_for('admin.delete_route', route_id=r.route_id) }}"
-            method="post"
-            onsubmit="return confirm('Ben je zeker dat je deze route wil verwijderen?');">
-
+          <form action="{{ url_for('admin.delete_route', route_id=r.route_id) }}" method="post"
+                onsubmit="return confirm('Ben je zeker dat je deze route wil verwijderen?');">
             <button class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm">
               Route verwijderen
             </button>
-
           </form>
         </div>
       </div>
 
-      <!-- UITKLAP KNOP -->
+      <!-- UITKLAP -->
       <button onclick="toggleDetails('route-{{ r.route_id }}')"
               class="mt-3 w-full text-left text-blue-600 font-medium hover:underline text-sm">
         ▼ Toon orders
       </button>
 
-      <!-- ORDER LIJST -->
+      <!-- ORDER LIST -->
       <div id="route-{{ r.route_id }}" class="hidden mt-3 ml-2 border-l-2 border-gray-300 pl-4">
 
         {% if r.deliveries %}
@@ -247,28 +242,38 @@
             </button>
 
             <div id="order-{{ d.order_id }}" class="hidden ml-4 mt-1 text-sm text-gray-700">
-              
+
               <p><strong>Adres:</strong> {{ d.order.delivery_address or "–" }}</p>
               <p><strong>Telefoon:</strong> {{ d.order.delivery_phone or "–" }}</p>
               <p><strong>Gewicht:</strong> {{ d.order.total_weight_kg }} kg</p>
+
+              <!-- ✔ ÉCHTE CIJFERS — 0 blijft 0 -->
+              <p><strong>Aantal flessen:</strong>
+                {{ d.order.number_of_bottles if d.order.number_of_bottles is not none else 0 }}
+              </p>
+
+              <p><strong>Aantal vaten:</strong>
+                {{ d.order.number_of_barrels if d.order.number_of_barrels is not none else 0 }}
+              </p>
+
+              <p><strong>Aantal BiBs:</strong>
+                {{ d.order.number_of_bibs if d.order.number_of_bibs is not none else 0 }}
+              </p>
+
               <p><strong>Status:</strong> {{ d.order.order_status }}</p>
               <p><strong>Volgorde:</strong> {{ d.sequence }}</p>
-              
-                <p><strong>Leveringstijd:</strong>
-            {% if d.order.delivery_window_end %}
-              {{ d.order.delivery_window_end.strftime('%H:%M') }}
-            {% else %}
-              –
-            {% endif %}
-        </p>
 
+              <p><strong>Leveringstijd:</strong>
+                {% if d.order.delivery_window_end %}
+                  {{ d.order.delivery_window_end.strftime('%H:%M') }}
+                {% else %}
+                  –
+                {% endif %}
               </p>
 
             </div>
-
           </div>
           {% endfor %}
-
         {% else %}
           <p class="text-gray-400 text-sm">Geen bestellingen toegewezen.</p>
         {% endif %}
@@ -277,15 +282,14 @@
 
     </div>
     {% endfor %}
-
   {% else %}
-    <p class="text-center text-slate-400 py-10">Nog geen routes.</p>
+  <p class="text-center text-slate-400 py-10">Nog geen routes.</p>
   {% endif %}
 
 </section>
 
 
-      <!-- Drivers tab -->
+      <!-- DRIVERS TAB -->
       <section id="tab-drivers" class="tab-pane hidden">
 
         <div class="mb-4">
@@ -303,12 +307,12 @@
           {% endfor %}
         </div>
         {% else %}
-          <p class="text-center text-slate-400 py-10">Nog geen drivers.</p>
+        <p class="text-center text-slate-400 py-10">Nog geen drivers.</p>
         {% endif %}
 
       </section>
 
-      <!-- Vehicles tab -->
+      <!-- VEHICLES TAB -->
       <section id="tab-vehicles" class="tab-pane hidden">
 
         <div class="flex items-center justify-between mb-4">
@@ -345,15 +349,15 @@
           {% endfor %}
         </div>
         {% else %}
-          <p class="text-center text-slate-400 py-10">Nog geen voertuigen.</p>
+        <p class="text-center text-slate-400 py-10">Nog geen voertuigen.</p>
         {% endif %}
 
       </section>
 
-    </div>
-  </div>
+    </div> <!-- end tab content -->
+  </div> <!-- end tabs container -->
 
-</div>
+</div> <!-- end screen -->
 
 <script>
   const buttons = document.querySelectorAll(".tab-btn");
@@ -361,16 +365,12 @@
 
   function activateTab(tabName) {
     buttons.forEach(b => {
-      b.classList.remove("bg-blue-50", "text-blue-700");
-      if (b.dataset.tab === tabName) {
-        b.classList.add("bg-blue-50", "text-blue-700");
-      }
+      b.classList.toggle("bg-blue-50", b.dataset.tab === tabName);
+      b.classList.toggle("text-blue-700", b.dataset.tab === tabName);
     });
 
     panes.forEach(p => {
-      p.id === "tab-" + tabName
-        ? p.classList.remove("hidden")
-        : p.classList.add("hidden");
+      p.classList.toggle("hidden", p.id !== "tab-" + tabName);
     });
   }
 
@@ -379,16 +379,10 @@
   });
 
   const params = new URLSearchParams(window.location.search);
-
-  if (params.has("q")) {
-    activateTab("orders");
-  } else {
-    activateTab("routes");
-  }
+  activateTab(params.has("q") ? "orders" : "routes");
 
   function toggleDetails(id) {
-    const el = document.getElementById(id);
-    if (el) el.classList.toggle("hidden");
+    document.getElementById(id)?.classList.toggle("hidden");
   }
 </script>
 
