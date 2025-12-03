@@ -184,8 +184,8 @@ def create_order():
 
         flash("Nieuwe order toegevoegd!", "success")
         return redirect(url_for("admin.dashboard"))
-
-    return render_template("order_create.html")
+    default_date = date.today().strftime("%Y-%m-%d")
+    return render_template("order_create.html", default_date=default_date)
 
 
 # -------------------------------------------
