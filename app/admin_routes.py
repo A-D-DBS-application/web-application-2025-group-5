@@ -181,9 +181,9 @@ def create_order():
             order_status=request.form.get("order_status"),
             payment_status=request.form.get("payment_status"),
 
-            number_of_barrels=qty_vat,
-            number_of_bottles=qty_fles,
-            number_of_bibs=qty_bib,
+            qty_vat=qty_vat,
+            qty_fles=qty_fles,
+            qty_bib=qty_bib,
 
             created_at=date.today(),
             updated_at=date.today(),
