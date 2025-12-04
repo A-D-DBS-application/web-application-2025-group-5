@@ -1,5 +1,3 @@
-# app/admin_routes.py
-
 from datetime import date, datetime
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 from sqlalchemy import or_
@@ -7,6 +5,9 @@ from .models import Route, User, Vehicle, Purchase_orders, Customer, Route_Deliv
 from . import db
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
+
+# Magazijnadres (vertrekpunt voor alle routes)
+WAREHOUSE_ADDRESS = "Industrieweg 202, 9030 Gent"
 
 
 # -------------------------------------------
@@ -29,9 +30,6 @@ def dashboard():
 
     today = date.today()
 
-    # -------------------------------------------
-    # ROUTE DATUMFILTER
-    # -------------------------------------------
     selected_route_date = request.args.get("route_date")
     routes_query = Route.query.order_by(Route.route_date.desc())
 
@@ -44,13 +42,10 @@ def dashboard():
             pass
 
     routes = routes_query.all()
-
     drivers = User.query.filter_by(role="driver", is_active=True).all()
     vehicles = Vehicle.query.filter_by(is_active=True).all()
 
-    # -------------------------------------------
-    # ORDER ZOEKFILTER
-    # -------------------------------------------
+    # --- ORDER ZOEKFILTER ---
     search_raw = request.args.get("q")
     search = (search_raw or "").strip()
 
@@ -59,7 +54,6 @@ def dashboard():
 
     if search:
         pattern = f"%{search}%"
-
         filters = [
             Purchase_orders.delivery_address.ilike(pattern),
             Purchase_orders.delivery_phone.ilike(pattern),
@@ -90,9 +84,6 @@ def dashboard():
     else:
         orders = Purchase_orders.query.order_by(Purchase_orders.created_at.desc()).all()
 
-    # -------------------------------------------
-    # RENDER DASHBOARD
-    # -------------------------------------------
     return render_template(
         "admin_dashboard.html",
         today=today,
@@ -103,7 +94,7 @@ def dashboard():
         total_orders=Purchase_orders.query.count(),
         pending_orders=Purchase_orders.query.filter_by(order_status="pending").count(),
         active_routes=Route.query.filter(Route.route_status != "completed").count(),
-        selected_route_date=date_obj,   # <-- BELANGRIJK!
+        selected_route_date=date_obj,
     )
 
 
@@ -159,10 +150,12 @@ def create_order():
         delivery_phone = request.form.get("delivery_phone")
         start_date = request.form.get("delivery_window_start")
         end_date = request.form.get("delivery_window_end")
+
         hour_start = request.form.get("delivery_hour_start") or "08:00"
         hour_end = request.form.get("delivery_hour_end") or "17:00"
         hour_start_obj = datetime.strptime(hour_start, "%H:%M").time()
         hour_end_obj = datetime.strptime(hour_end, "%H:%M").time()
+
         qty_vat = int(request.form.get("qty_vat") or 0)
         qty_fles = int(request.form.get("qty_fles") or 0)
         qty_bib = int(request.form.get("qty_bib") or 0)
@@ -180,11 +173,9 @@ def create_order():
             total_weight_kg=total_weight,
             order_status=request.form.get("order_status"),
             payment_status=request.form.get("payment_status"),
-
             qty_vat=qty_vat,
             qty_fles=qty_fles,
             qty_bib=qty_bib,
-
             created_at=date.today(),
             updated_at=date.today(),
         )
@@ -194,17 +185,22 @@ def create_order():
 
         flash("Nieuwe order toegevoegd!", "success")
         return redirect(url_for("admin.dashboard"))
+
     default_date = date.today().strftime("%Y-%m-%d")
     return render_template("order_create.html", default_date=default_date)
 
 
 # -------------------------------------------
-#  ORDERS TOEWIJZEN AAN ROUTE
+#  ORDERS TOEWIJZEN + OPTIMALISEREN (MET MAGAZIJN)
 # -------------------------------------------
 @admin_bp.route("/routes/<int:route_id>/assign", methods=["GET", "POST"])
 def assign_orders(route_id):
     if not require_admin():
         return redirect(url_for("auth.login"))
+
+    # imports lokaal houden om circular imports te vermijden
+    from app.utils.route_utils import get_distance_matrix, optimize_route
+    from app.utils.mapbox_utils import geocode_address
 
     route = Route.query.get_or_404(route_id)
 
@@ -215,23 +211,61 @@ def assign_orders(route_id):
             flash("Selecteer minstens één bestelling.", "error")
             return redirect(url_for("admin.assign_orders", route_id=route_id))
 
-        current_max = max([d.sequence for d in route.deliveries], default=0)
+        # 1. Haal orders op in de volgorde die uit het formulier komt
+        orders = [Purchase_orders.query.get(int(oid)) for oid in order_ids]
 
-        for idx, oid in enumerate(order_ids, start=1):
-            delivery = Route_Delivery(
+        # 2. Geocodeer magazijn
+        warehouse_coords = geocode_address(WAREHOUSE_ADDRESS)
+        if not warehouse_coords:
+            flash("Magazijnadres kon niet gegeocodeerd worden.", "error")
+            return redirect(url_for("admin.assign_orders", route_id=route_id))
+
+        # 3. Coördinatenlijst: [magazijn, order1, order2, ...]
+        coords = [warehouse_coords]
+        for o in orders:
+            c = geocode_address(o.delivery_address)
+            if not c:
+                flash(f"Adres niet gevonden: {o.delivery_address}", "error")
+                return redirect(url_for("admin.assign_orders", route_id=route_id))
+            coords.append(c)
+
+        # 4. Distance matrix berekenen
+        distance_matrix = get_distance_matrix(coords)
+        if not distance_matrix:
+            flash("Kon distance matrix niet berekenen.", "error")
+            return redirect(url_for("admin.assign_orders", route_id=route_id))
+
+        # 5. Optimale volgorde bepalen (indices over coords)
+        optimal_route_indices = optimize_route(distance_matrix)
+        # Voorbeeld: [0, 2, 1, 3]  -> 0 = magazijn, 2/1/3 = orders
+
+        # 6. Oude deliveries weggooien voor deze route
+        Route_Delivery.query.filter_by(route_id=route.route_id).delete()
+
+        # 7. Nieuwe deliveries opslaan in optimale volgorde
+        seq = 1
+        for idx in optimal_route_indices:
+            if idx == 0:
+                # index 0 is het magazijn, die slaan we over
+                continue
+
+            # idx 1 hoort bij orders[0], idx 2 bij orders[1], enz.
+            order_obj = orders[idx - 1]
+
+            db.session.add(Route_Delivery(
                 route_id=route.route_id,
-                order_id=int(oid),
-                sequence=current_max + idx,
+                order_id=order_obj.order_id,
+                sequence=seq,
                 delivery_status="planned",
-            )
-            db.session.add(delivery)
+            ))
+            seq += 1
 
         db.session.commit()
-        flash("Bestellingen toegewezen!", "success")
+        flash("Optimale route berekend (vertrekkend vanuit magazijn) en opgeslagen!", "success")
         return redirect(url_for("admin.dashboard"))
 
+    # GET → toon pagina (beschikbare orders)
     delivery_date = request.args.get("delivery_date")
-
     if delivery_date:
         try:
             selected_date = datetime.strptime(delivery_date, "%Y-%m-%d").date()
@@ -366,3 +400,5 @@ def create_user():
         return redirect(url_for("admin.dashboard"))
 
     return render_template("user_create.html")
+
+
