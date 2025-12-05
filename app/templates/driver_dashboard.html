@@ -17,7 +17,11 @@
         </a>
     </div>
 
-    <!-- GEEN ROUTE VANDAAG -->
+
+    <!-- =============================== -->
+    <!--   ROUTE VAN VANDAAG             -->
+    <!-- =============================== -->
+
     {% if not route_today %}
 
         <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm mb-10">
@@ -27,7 +31,7 @@
 
     {% else %}
 
-        <!-- ROUTE DETAILS -->
+        <!-- ROUTE INFO VANDAAG -->
         <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm mb-6">
             <h2 class="text-xl font-semibold text-gray-900 mb-4">
                 Route voor {{ today.strftime('%d/%m/%Y') }}
@@ -46,7 +50,7 @@
             </div>
         </div>
 
-        <!-- STOPS VAN VANDAAG -->
+        <!-- LEVERINGEN VANDAAG -->
         <h3 class="text-lg font-semibold mb-4">Stops voor vandaag</h3>
 
         {% if not deliveries_today %}
@@ -60,7 +64,6 @@
 
                     <div class="flex justify-between items-center">
 
-                        <!-- LINKERKANT -->
                         <div>
                             <p class="text-gray-900 font-medium">Order #{{ d.order_id }}</p>
                             <p class="text-gray-600 text-sm">{{ d.order.delivery_address }}</p>
@@ -72,10 +75,8 @@
                             </p>
                         </div>
 
-                        <!-- RECHTERKANT STATUS + BUTTON -->
                         <div class="flex flex-col items-end">
 
-                            <!-- STATUS BADGE -->
                             <span class="px-2 py-1 rounded-full text-xs mb-2
                                 {% if d.delivery_status == 'delivered' %}
                                     bg-green-100 text-green-700
@@ -88,22 +89,19 @@
 
                             {% if d.delivery_status != "delivered" %}
                             <form method="POST"
-                                  action="{{ url_for('driver.mark_delivered', route_delivery_id=d.route_delivery_id) }}">
+                                  action="{{ url_for('driver.mark_delivered', delivery_id=d.route_delivery_id) }}">
                                 <button type="submit"
-                                        class="px-3 py-1 text-xs rounded-lg
-                                               bg-green-100 text-green-700 border border-green-300 hover:bg-green-200">
+                                        class="px-3 py-1 text-xs rounded-lg bg-green-100 text-green-700 border border-green-300 hover:bg-green-200">
                                     Markeer als geleverd
                                 </button>
                             </form>
                             {% endif %}
                         </div>
-
                     </div>
 
-                    <!-- COMMENT FORM -->
                     {% if d.delivery_status == "delivered" and not d.delivery_comment %}
                     <form method="POST"
-                          action="{{ url_for('driver.save_comment', route_delivery_id=d.route_delivery_id) }}"
+                          action="{{ url_for('driver.save_comment', delivery_id=d.route_delivery_id) }}"
                           class="mt-3 space-y-2">
 
                         <textarea name="comment" rows="2"
@@ -115,7 +113,6 @@
                         </button>
                     </form>
                     {% endif %}
-
                 </li>
                 {% endfor %}
             </ul>
@@ -123,15 +120,20 @@
         {% endif %}
     {% endif %}
 
-</div>
-{% endblock %}
 
-<!-- ROUTE VAN MORGEN -->
-<div class="mt-10">
-    <h2 class="text-xl font-semibold text-gray-900 mb-4">Morgen – {{ tomorrow.strftime('%d/%m/%Y') }}</h2>
+    <!-- =============================== -->
+    <!--   ROUTE VAN MORGEN              -->
+    <!-- =============================== -->
+
+    <hr class="my-10">
+
+    <h2 class="text-xl font-semibold text-gray-900 mb-4">
+        Morgen – {{ tomorrow.strftime('%d/%m/%Y') }}
+    </h2>
 
     {% if not route_tomorrow %}
         <p class="text-gray-500">Geen route gepland voor morgen.</p>
+
     {% else %}
 
         <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-6">
@@ -166,6 +168,7 @@
                 {% endfor %}
             </ul>
         {% endif %}
-
     {% endif %}
+
 </div>
+{% endblock %}
