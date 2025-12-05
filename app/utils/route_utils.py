@@ -15,12 +15,6 @@ WAREHOUSE_COORDS = geocode_address(WAREHOUSE_ADDRESS)
 
 
 def get_distance_matrix(coordinates):
-    """
-    Maakt een distance matrix via de Mapbox Matrix API.
-    coordinates: lijst van (lng, lat)
-    return: matrix met durations (in seconden)
-    """
-
     coords_str = ";".join([f"{lng},{lat}" for lng, lat in coordinates])
 
     url = f"https://api.mapbox.com/directions-matrix/v1/mapbox/driving/{coords_str}"
@@ -35,8 +29,15 @@ def get_distance_matrix(coordinates):
         print("Fout in Matrix API:", r)
         return None
 
-    return r["durations"]
+    matrix = r["durations"]
 
+    # --- FIX: vervang None door grote waarde zodat SciPy kan rekenen ---
+    for i in range(len(matrix)):
+        for j in range(len(matrix[i])):
+            if matrix[i][j] is None:
+                matrix[i][j] = 999999  # enorme straf zodat het nooit wordt gekozen
+
+    return matrix
 
 def optimize_route(distance_matrix):
     """

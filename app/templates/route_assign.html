@@ -5,66 +5,72 @@
 <div class="min-h-screen bg-gray-50 flex items-center justify-center p-6">
 
   <div class="bg-white w-full max-w-xl p-6 rounded-2xl shadow-lg border border-gray-200">
-    <!-- Titel + info -->
+    
     <h2 class="text-xl font-semibold text-gray-900 mb-1">
       Bestellingen toewijzen aan route {{ route.route_id }}
     </h2>
     <p class="text-sm text-gray-500 mb-4">
-      Driver: {{ route.driver.name if route.driver }}<br>
-      Datum: {{ route.route_date.strftime('%d/%m/%Y') if route.route_date }}
+      Driver: {{ route.driver.name }}<br>
+      Datum: {{ route.route_date.strftime('%d/%m/%Y') }}
     </p>
 
-    <!-- Filter op leverdatum -->
     <form method="get" class="mb-4">
       <label class="block text-sm font-medium text-gray-700 mb-1">Leverdatum:</label>
       <div class="flex gap-2">
         <input type="date"
                name="delivery_date"
-               value="{{ selected_date.isoformat() if selected_date }}"
-               class="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+               value="{{ selected_date.isoformat() }}"
+               class="flex-1 border border-gray-300 rounded-lg px-3 py-2">
         <button type="submit"
-                class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700">
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm">
           Filter
         </button>
       </div>
     </form>
 
-    <!-- Lijst van orders -->
     <form method="post">
       {% if available_orders %}
         <div class="space-y-3 mb-5 max-h-[420px] overflow-y-auto pr-1">
+
           {% for o in available_orders %}
-            <label class="block border border-gray-200 rounded-lg px-4 py-3 flex items-start gap-3 cursor-pointer hover:bg-gray-50">
-              <input type="checkbox"
-                     name="order_ids"
-                     value="{{ o.order_id }}"
-                     class="mt-1">
-              <div class="flex-1">
-                <p class="font-medium text-gray-900 text-sm">Order #{{ o.order_id }}</p>
-                <p class="text-xs text-gray-500">NULL</p>
-                <p class="text-sm text-gray-700 mt-1">
-                  Gewicht: {{ o.total_weight_kg }} kg
-                </p>
-              </div>
-            </label>
+          <label class="block border border-gray-200 rounded-lg px-4 py-3 cursor-pointer hover:bg-gray-50 flex gap-3">
+
+            <input type="checkbox" name="order_ids" value="{{ o.order_id }}" class="mt-1">
+
+            <div>
+              <p class="font-medium text-gray-900 text-sm">Order #{{ o.order_id }}</p>
+
+              <p class="text-xs text-gray-500">
+                  {{ o.customer.customer_name }} —
+                  {{ o.customer.street_number }},
+                  {{ o.customer.postal_code }} {{ o.customer.city }}
+              </p>
+
+              <p class="text-sm text-gray-700 mt-1">
+                Gewicht: {{ o.total_weight_kg }} kg
+              </p>
+            </div>
+
+          </label>
           {% endfor %}
+
         </div>
+
       {% else %}
         <p class="text-center text-gray-400 text-sm py-8">
-          Er zijn geen bestellingen voor deze leverdatum die nog niet toegewezen zijn.
+          Geen bestellingen beschikbaar voor deze datum.
         </p>
       {% endif %}
 
-      <!-- Toewijzen -->
       <button type="submit"
-              class="w-full bg-blue-700 hover:bg-blue-800 text-white font-medium py-2 rounded-lg text-sm">
-        Toewijzen aan deze route
+              class="w-full bg-blue-700 hover:bg-blue-800 text-white py-2 rounded-lg text-sm">
+        Bestellingen toewijzen
       </button>
+
     </form>
 
-    <!-- ⭐ EXTRA KNOP: TERUG NAAR ROUTES -->
     <a href="{{ url_for('admin.dashboard') }}#routes"
-       class="w-full block text-center mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 rounded-lg text-sm">
+       class="w-full block text-center mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg text-sm">
       Sluiten
     </a>
 

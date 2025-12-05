@@ -4,386 +4,417 @@
 {% block content %}
 <div class="min-h-screen bg-slate-50 px-6 py-6">
 
-  <!-- Topbar -->
-  <div class="flex items-center justify-between mb-6">
+<!-- HEADER -->
+<div class="flex items-center justify-between mb-6">
     <div class="flex items-center gap-3">
-      <div class="bg-blue-600 text-white w-12 h-12 rounded-xl flex items-center justify-center shadow">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24"
-             stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm10 2a2 2 0 100-4 2 2 0 000 4zM3 5h12v11H3V5zm12 4h4l2 3v4h-6V9z"/>
-        </svg>
-      </div>
-      <div>
-        <h1 class="text-2xl font-semibold text-slate-900">Admin Dashboard</h1>
-        <p class="text-slate-500 text-sm">Route planning beheer</p>
-      </div>
+        <div class="bg-blue-600 text-white w-12 h-12 rounded-xl flex items-center justify-center shadow">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none"
+                 viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm10 2a2 2 0 100-4 2 2 0 000 4zM3 5h12v11H3V5zm12 4h4l2 3v4h-6V9z"/>
+            </svg>
+        </div>
+
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-900">Admin Dashboard</h1>
+            <p class="text-slate-500 text-sm">Route planning beheer</p>
+        </div>
     </div>
 
     <a href="{{ url_for('auth.logout') }}"
        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 text-sm hover:bg-slate-100">
       Uitloggen
     </a>
-  </div>
+</div>
 
-  <!-- Stat cards -->
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+<!-- STATS -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
     <div class="bg-white rounded-2xl border border-slate-200 p-4">
-      <p class="text-sm text-slate-500 mb-1">Totaal Bestellingen</p>
-      <p class="text-3xl font-semibold text-slate-900">{{ total_orders }}</p>
+        <p class="text-sm text-slate-500 mb-1">Totaal bestellingen</p>
+        <p class="text-3xl font-semibold text-slate-900">{{ total_orders }}</p>
     </div>
-    <div class="bg-white rounded-2xl border border-slate-200 p-4">
-      <p class="text-sm text-slate-500 mb-1">Pending</p>
-      <p class="text-3xl font-semibold text-slate-900">{{ pending_orders }}</p>
-    </div>
-    <div class="bg-white rounded-2xl border border-slate-200 p-4">
-      <p class="text-sm text-slate-500 mb-1">Actieve Routes</p>
-      <p class="text-3xl font-semibold text-slate-900">{{ active_routes }}</p>
-    </div>
-    <div class="bg-white rounded-2xl border border-slate-200 p-4">
-      <p class="text-sm text-slate-500 mb-1">Drivers</p>
-      <p class="text-3xl font-semibold text-slate-900">{{ drivers|length }}</p>
-    </div>
-  </div>
 
-  <!-- Nieuw Account -->
-  <a href="{{ url_for('admin.create_user') }}"
-     class="block bg-white p-6 rounded-xl shadow hover:shadow-lg transition border border-gray-200 mb-6">
-      <h3 class="text-lg font-medium text-gray-900 mb-1">Nieuw Account</h3>
-      <p class="text-gray-500 text-sm">Maak een nieuwe admin of driver aan</p>
-  </a>
+    <div class="bg-white rounded-2xl border border-slate-200 p-4">
+        <p class="text-sm text-slate-500 mb-1">Pending</p>
+        <p class="text-3xl font-semibold text-slate-900">{{ pending_orders }}</p>
+    </div>
 
-  <!-- Tabs -->
-  <div class="bg-white rounded-2xl border border-slate-200">
+    <div class="bg-white rounded-2xl border border-slate-200 p-4">
+        <p class="text-sm text-slate-500 mb-1">Actieve routes</p>
+        <p class="text-3xl font-semibold text-slate-900">{{ active_routes }}</p>
+    </div>
 
-    <!-- Tab header -->
-    <div class="border-b border-slate-200 px-4 pt-3">
-      <div class="flex gap-4">
-        <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-slate-600 hover:text-blue-700"
-                data-tab="orders">Bestellingen</button>
+    <div class="bg-white rounded-2xl border border-slate-200 p-4">
+        <p class="text-sm text-slate-500 mb-1">Drivers</p>
+        <p class="text-3xl font-semibold text-slate-900">{{ drivers|length }}</p>
+    </div>
+</div>
+
+<!-- NIEUW ACCOUNT -->
+<a href="{{ url_for('admin.create_user') }}"
+   class="block bg-white p-6 rounded-xl shadow hover:shadow-lg transition border border-gray-200 mb-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-1">Nieuw Account</h3>
+    <p class="text-gray-500 text-sm">Maak een nieuwe admin of driver aan</p>
+</a>
+
+<!-- TABS -->
+<div class="bg-white rounded-2xl border border-slate-200">
+
+<!-- TAB HEADERS -->
+<div class="border-b border-slate-200 px-4 pt-3">
+    <div class="flex gap-4">
 
         <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-blue-700 bg-blue-50"
                 data-tab="routes">Routes</button>
 
-        <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-slate-600 hover:text-blue-700"
+        <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-slate-600"
+                data-tab="orders">Bestellingen</button>
+
+        <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-slate-600"
                 data-tab="drivers">Drivers</button>
 
-        <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-slate-600 hover:text-blue-700"
+        <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-slate-600"
                 data-tab="vehicles">Voertuigen</button>
-      </div>
     </div>
+</div>
 
-    <!-- Tab content container -->
-    <div class="p-6 space-y-6">
-
-      <!-- Orders tab -->
-      <section id="tab-orders" class="tab-pane hidden">
-
-        <div class="flex items-center justify-between mb-4">
-          <div>
-            <h2 class="text-lg font-semibold text-slate-900">Orders</h2>
-            <p class="text-sm text-slate-500">Beheer bestellingen</p>
-          </div>
-          
-          <div class="flex items-center gap-3">
-            <form method="get" action="{{ url_for('admin.dashboard') }}">
-              <input type="text" name="q"
-                     placeholder="Zoek op klant, telefoon, adres, gewicht..."
-                     value="{{ request.args.get('q', '') }}"
-                     class="px-3 py-2 rounded-lg border border-slate-300 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </form>
-
-            <a href="{{ url_for('admin.create_order') }}"
-               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-700 text-white text-sm hover:bg-blue-800">
-              + Nieuwe Order
-            </a>
-          </div>
-        </div>
-
-        {% if orders %}
-        <div class="space-y-3">
-          {% for o in orders %}
-          <div class="border border-slate-200 rounded-xl p-4 flex justify-between">
-            <div class="space-y-1">
-              <p class="font-semibold text-slate-900">Order #{{ o.order_id }}</p>
-              <p class="text-sm text-slate-500">
-                Klant: {{ o.customer.customer }} –
-                {{ o.customer.street_number }}, {{ o.customer.postal_code }} {{ o.customer.city }}
-              </p>
-              <p class="text-sm text-slate-500">
-                Tel: {{ o.customer.celphone or o.customer.phone }} |
-                Gewicht: {{ o.total_weight_kg }} kg
-              </p>
-              <p class="text-sm text-slate-500">
-                Vaten: {{ o.qty_vat }} | Flessen: {{ o.qty_fles }} | BIBs: {{ o.qty_bib }}
-              </p>
-
-              <p class="text-sm text-slate-500">
-                Leverdatum: {{o.delivery_window_end.strftime('%d-%m-%Y') }}
-              </p>
-            </div>
-
-            <div class="flex flex-col gap-2 items-end text-xs">
-              <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700">
-                Order: {{ o.order_status }}
-              </span>
-              <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700">
-                Betaling: {{ o.payment_status }}
-              </span>
-            </div>
-          </div>
-          {% endfor %}
-        </div>
-        {% else %}
-        <p class="text-center text-slate-400 py-10">Nog geen orders.</p>
-        {% endif %}
-
-      </section>
+<!-- TAB CONTENT -->
+<div class="p-6 space-y-6">
 
 
-<!-- ROUTES TAB -->
+<!-- ========================================================= -->
+<!--  ROUTES TAB (nieuwe + delivered + comment support) -->
+<!-- ========================================================= -->
 <section id="tab-routes" class="tab-pane">
 
-  <div class="flex items-center justify-between mb-4">
-    <div>
-      <h2 class="text-lg font-semibold text-slate-900">Routes</h2>
-      <p class="text-sm text-slate-500">Beheer dagelijkse routes</p>
-    </div>
-
-    <a href="{{ url_for('admin.create_route') }}"
-       class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-700 text-white text-sm hover:bg-blue-800">
-      + Nieuwe Route
-    </a>
-  </div>
-
-  <!-- Filter -->
-  <form method="get" action="{{ url_for('admin.dashboard') }}" class="mb-6 flex items-end gap-3">
-    <div>
-      <label class="text-sm font-medium text-slate-600 mb-1 block">
-        Filter op datum:
-      </label>
-      <input type="date" name="route_date"
-             value="{{ selected_route_date.isoformat() if selected_route_date }}"
-             class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
-    </div>
-
-    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">Filter</button>
-
-    {% if selected_route_date %}
-    <a href="{{ url_for('admin.dashboard') }}"
-       class="px-4 py-2 rounded-lg text-sm bg-gray-200 text-gray-700 hover:bg-gray-300">
-      Reset
-    </a>
-    {% endif %}
-  </form>
-
-  {% if routes %}
-    {% for r in routes %}
-    <div class="bg-white border border-gray-200 rounded-xl p-4 mb-3 shadow-sm">
-
-      <!-- HEADER -->
-      <div class="flex justify-between items-start">
+    <div class="flex items-center justify-between mb-4">
         <div>
-          <p class="font-semibold text-gray-900">
-            {{ r.route_date.strftime('%d/%m/%Y') }} – {{ r.driver.name }}
-          </p>
-          <p class="text-sm text-gray-500">
-            Voertuig: {{ r.vehicle.license_plate if r.vehicle else "–" }}
-          </p>
-<p class="text-sm text-gray-500">
-  Status:
-  <span class="
-    px-2 py-1 rounded-full text-xs
-    {% if r.route_status.lower() == 'planned' %}
-      bg-green-100 text-green-700
-    {% else %}
-      bg-slate-100 text-slate-600
-    {% endif %}
-  ">
-    {{ r.route_status }}
-  </span>
-</p>
-
-          </p>
-
+            <h2 class="text-lg font-semibold text-slate-900">Routes</h2>
+            <p class="text-sm text-slate-500">Beheer dagelijkse routes</p>
         </div>
 
-        <div class="flex gap-2">
-          <a href="{{ url_for('admin.assign_orders', route_id=r.route_id) }}"
-             class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
-            Bestellingen toewijzen
-          </a>
+        <a href="{{ url_for('admin.create_route') }}"
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-700 text-white text-sm hover:bg-blue-800">
+          + Nieuwe Route
+        </a>
+    </div>
 
-          <form action="{{ url_for('admin.delete_route', route_id=r.route_id) }}" method="post"
-                onsubmit="return confirm('Ben je zeker dat je deze route wil verwijderen?');">
-            <button class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm">
-              Route verwijderen
-            </button>
-          </form>
+    <!-- FILTER -->
+    <form method="get" action="{{ url_for('admin.dashboard') }}" class="mb-6 flex items-end gap-3">
+        <div>
+            <label class="text-sm font-medium text-slate-600 mb-1 block">
+                Filter op datum:
+            </label>
+            <input type="date" name="route_date"
+                   value="{{ selected_route_date.isoformat() if selected_route_date }}"
+                   class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
         </div>
-      </div>
 
-      <!-- UITKLAP -->
-      <button onclick="toggleDetails('route-{{ r.route_id }}')"
-              class="mt-3 w-full text-left text-blue-600 font-medium hover:underline text-sm">
-        ▼ Toon orders
-      </button>
+        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">Filter</button>
 
-      <!-- ORDER LIST -->
-      <div id="route-{{ r.route_id }}" class="hidden mt-3 ml-2 border-l-2 border-gray-300 pl-4">
+        {% if selected_route_date %}
+        <a href="{{ url_for('admin.dashboard') }}"
+           class="px-4 py-2 rounded-lg text-sm bg-gray-200 text-gray-700 hover:bg-gray-300">
+          Reset
+        </a>
+        {% endif %}
+    </form>
 
-        {% if r.deliveries %}
-          {% for d in r.deliveries %}
-          <div class="mb-2">
+    {% if routes %}
+      {% for r in routes %}
 
-            <button onclick="toggleDetails('order-{{ d.order_id }}')"
-                    class="text-gray-900 font-medium hover:underline text-sm">
-              • Order #{{ d.order_id }}
-            </button>
+      <div class="bg-white border border-gray-200 rounded-xl p-4 mb-3 shadow-sm">
 
-            <div id="order-{{ d.order_id }}" class="hidden ml-4 mt-1 text-sm text-gray-700">
+        <!-- HEADER -->
+        <div class="flex justify-between items-start">
+          <div>
 
-              <p><strong>Adres:</strong> {{ d.order.delivery_address or "–" }}</p>
-              <p><strong>Telefoon:</strong> {{ d.order.delivery_phone or "–" }}</p>
-              <p><strong>Gewicht:</strong> {{ d.order.total_weight_kg }} kg</p>
+            <p class="font-semibold text-gray-900">
+              {{ r.route_date.strftime('%d/%m/%Y') }} – {{ r.driver.name }}
+            </p>
 
-              <!-- ✔ ÉCHTE CIJFERS — 0 blijft 0 -->
-              <p><strong>Aantal flessen:</strong>
-                {{ d.order.qty_fles if d.order.qty_fles is not none else 0 }}
-              </p>
+            <p class="text-sm text-gray-500">
+              Voertuig:
+              {{ r.vehicle.license_plate if r.vehicle else "Geen voertuig" }}
+            </p>
 
-              <p><strong>Aantal vaten:</strong>
-                {{ d.order.qty_vat if d.order.qty_vat is not none else 0 }}
-              </p>
+            {% set delivered_count = r.deliveries|selectattr("delivery_status", "equalto", "delivered")|list|length %}
+            {% set all_delivered = r.deliveries|length > 0 and delivered_count == r.deliveries|length %}
 
-              <p><strong>Aantal BiBs:</strong>
-                {{ d.order.qty_bib if d.order.qty_bib is not none else 0 }}
-              </p>
+            <p class="text-sm text-gray-500">
+              Status:
+              {% if all_delivered %}
+                <span class="px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs">
+                  delivered
+                </span>
+              {% else %}
+                <span class="px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs">
+                  planned
+                </span>
+              {% endif %}
+            </p>
+          </div>
 
-              <p><strong>Status:</strong> {{ d.order.order_status }}</p>
-              <p><strong>Volgorde:</strong> {{ d.sequence }}</p>
+          <div class="flex gap-2">
+            <a href="{{ url_for('admin.assign_orders', route_id=r.route_id) }}"
+               class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
+              Bestellingen toewijzen
+            </a>
 
-              <p><strong>Leveringstijd:</strong>
-                {% if d.order.delivery_window_end %}
-                  {{ d.order.delivery_window_end.strftime('%H:%M') }}
-                {% else %}
-                  –
+            <form action="{{ url_for('admin.delete_route', route_id=r.route_id) }}"
+                  method="post"
+                  onsubmit="return confirm('Ben je zeker dat je deze route wil verwijderen?');">
+              <button class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm">
+                Route verwijderen
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- UITKLAP -->
+        <button onclick="toggleDetails('route-{{ r.route_id }}')"
+                class="mt-3 w-full text-left text-blue-600 font-medium hover:underline text-sm">
+          ▼ Toon orders
+        </button>
+
+        <div id="route-{{ r.route_id }}"
+             class="hidden mt-3 ml-2 border-l-2
+                    border-gray-300 pl-4">
+
+          {% if r.deliveries %}
+            {% set comments = [] %}
+
+            {% for d in r.deliveries %}
+            <div class="mb-2">
+
+              <button onclick="toggleDetails('order-{{ d.order_id }}')"
+                      class="text-gray-900 font-medium hover:underline text-sm">
+                • Order #{{ d.order_id }}
+              </button>
+
+              <div id="order-{{ d.order_id }}" class="hidden ml-4 mt-1 text-sm text-gray-700">
+                <p><strong>Adres:</strong> {{ d.order.delivery_address }}</p>
+                <p><strong>Telefoon:</strong> {{ d.order.delivery_phone }}</p>
+                <p><strong>Gewicht:</strong> {{ d.order.total_weight_kg }} kg</p>
+
+                <p><strong>Flessen:</strong> {{ d.order.qty_fles or 0 }}</p>
+                <p><strong>Vaten:</strong> {{ d.order.qty_vat or 0 }}</p>
+                <p><strong>BiBs:</strong> {{ d.order.qty_bib or 0 }}</p>
+
+                <p><strong>Status levering:</strong> {{ d.delivery_status }}</p>
+                <p><strong>Volgorde:</strong> {{ d.sequence }}</p>
+
+                {% if d.delivery_comment %}
+                  <p class="font-semibold text-red-700">
+                      <strong>Commentaar driver:</strong>
+                      <span class="text-red-600">{{ d.delivery_comment }}</span>
+                  </p>
+                  {% set _ = comments.append(d.delivery_comment) %}
                 {% endif %}
-              </p>
+
+              </div>
 
             </div>
-          </div>
-          {% endfor %}
-        {% else %}
-          <p class="text-gray-400 text-sm">Geen bestellingen toegewezen.</p>
-        {% endif %}
+            {% endfor %}
 
+        
+
+          {% else %}
+            <p class="text-gray-400 text-sm">Geen bestellingen.</p>
+          {% endif %}
+
+        </div>
       </div>
 
-    </div>
-    {% endfor %}
-  {% else %}
-  <p class="text-center text-slate-400 py-10">Nog geen routes.</p>
-  {% endif %}
+      {% endfor %}
+    {% else %}
+      <p class="text-center text-gray-400 py-10">Geen routes.</p>
+    {% endif %}
 
 </section>
 
 
-      <!-- DRIVERS TAB -->
-      <section id="tab-drivers" class="tab-pane hidden">
 
-        <div class="mb-4">
-          <h2 class="text-lg font-semibold text-slate-900">Drivers</h2>
-          <p class="text-sm text-slate-500">Overzicht van alle drivers</p>
+<!-- ========================================================= -->
+<!-- ORDERS TAB (volledig herstel van jouw originele inhoud) -->
+<!-- ========================================================= -->
+
+<section id="tab-orders" class="tab-pane hidden">
+
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h2 class="text-lg font-semibold text-slate-900">Orders</h2>
+        <p class="text-sm text-slate-500">Beheer bestellingen</p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <form method="get" action="{{ url_for('admin.dashboard') }}">
+          <input type="text" name="q"
+                 placeholder="Zoek op klant, telefoon, adres, gewicht..."
+                 value="{{ request.args.get('q', '') }}"
+                 class="px-3 py-2 rounded-lg border border-slate-300 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </form>
+
+        <a href="{{ url_for('admin.create_order') }}"
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-700 text-white text-sm hover:bg-blue-800">
+          + Nieuwe Order
+        </a>
+      </div>
+    </div>
+
+    {% if orders %}
+    <div class="space-y-3">
+      {% for o in orders %}
+      <div class="border border-slate-200 rounded-xl p-4 flex justify-between">
+        <div class="space-y-1">
+          <p class="font-semibold text-slate-900">Order #{{ o.order_id }}</p>
+
+          <p class="text-sm text-slate-500">
+            Klant: {{ o.customer.customer }}
+            – {{ o.customer.street_number }},
+              {{ o.customer.postal_code }} {{ o.customer.city }}
+          </p>
+
+          <p class="text-sm text-slate-500">
+            Tel: {{ o.customer.celphone or o.customer.phone }} |
+            Gewicht: {{ o.total_weight_kg }} kg
+          </p>
+
+          <p class="text-sm text-slate-500">
+            Vaten: {{ o.qty_vat }} | Flessen: {{ o.qty_fles }} | BIBs: {{ o.qty_bib }}
+          </p>
+
+          <p class="text-sm text-slate-500">
+            Leverdatum: {{ o.delivery_window_end.strftime('%d-%m-%Y') }}
+          </p>
         </div>
 
-        {% if drivers %}
-        <div class="space-y-3">
-          {% for d in drivers %}
-          <div class="border border-slate-200 rounded-xl p-4 flex justify-between">
-            <p class="font-semibold text-slate-900">{{ d.name }}</p>
-            <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700 text-xs">Driver</span>
-          </div>
-          {% endfor %}
+        <div class="flex flex-col gap-2 items-end text-xs">
+          <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700">
+            Order: {{ o.order_status }}
+          </span>
+          <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700">
+            Betaling: {{ o.payment_status }}
+          </span>
         </div>
-        {% else %}
-        <p class="text-center text-slate-400 py-10">Nog geen drivers.</p>
-        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-center text-slate-400 py-10">Nog geen orders.</p>
+    {% endif %}
+</section>
 
-      </section>
 
-      <!-- VEHICLES TAB -->
-      <section id="tab-vehicles" class="tab-pane hidden">
 
-        <div class="flex items-center justify-between mb-4">
-          <div>
-            <h2 class="text-lg font-semibold text-slate-900">Voertuigen</h2>
-            <p class="text-sm text-slate-500">Beheer alle voertuigen</p>
-          </div>
+<!-- ========================================================= -->
+<!-- DRIVERS TAB (volledig herstel) -->
+<!-- ========================================================= -->
 
-          <a href="{{ url_for('admin.create_vehicle') }}"
-             class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-700 text-white text-sm hover:bg-blue-800">
-            + Nieuw Voertuig
-          </a>
+<section id="tab-drivers" class="tab-pane hidden">
+    <div class="mb-4">
+      <h2 class="text-lg font-semibold text-slate-900">Drivers</h2>
+      <p class="text-sm text-slate-500">Overzicht van alle drivers</p>
+    </div>
+
+    {% if drivers %}
+    <div class="space-y-3">
+      {% for d in drivers %}
+      <div class="border border-slate-200 rounded-xl p-4 flex justify-between">
+        <p class="font-semibold text-slate-900">{{ d.name }}</p>
+        <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700 text-xs">
+          Driver
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-center text-slate-400 py-10">Nog geen drivers.</p>
+    {% endif %}
+</section>
+
+
+
+<!-- ========================================================= -->
+<!-- VEHICLES TAB (volledig herstel) -->
+<!-- ========================================================= -->
+
+<section id="tab-vehicles" class="tab-pane hidden">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h2 class="text-lg font-semibold text-slate-900">Voertuigen</h2>
+        <p class="text-sm text-slate-500">Beheer alle voertuigen</p>
+      </div>
+
+      <a href="{{ url_for('admin.create_vehicle') }}"
+         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-700 text-white text-sm hover:bg-blue-800">
+        + Nieuw Voertuig
+      </a>
+    </div>
+
+    {% if vehicles %}
+    <div class="space-y-3">
+      {% for v in vehicles %}
+      <div class="border border-slate-200 rounded-xl p-4 flex justify-between">
+
+        <div class="space-y-1">
+          <p class="font-semibold text-slate-900">{{ v.license_plate }}</p>
+          <p class="text-sm text-slate-500">{{ v.brand }} {{ v.model or "" }}</p>
+          <p class="text-sm text-slate-500">Capaciteit: {{ v.capacity_kg }} kg</p>
+          <p class="text-sm text-slate-500">Brandstof: {{ v.fuel_type }}</p>
+          <p class="text-sm text-slate-500">Kleur: {{ v.color }}</p>
         </div>
 
-        {% if vehicles %}
-        <div class="space-y-3">
-          {% for v in vehicles %}
-          <div class="border border-slate-200 rounded-xl p-4 flex justify-between">
+        <span class="px-2 py-1 rounded-full text-xs
+                     {% if v.is_active %}
+                       bg-green-100 text-green-700
+                     {% else %}
+                       bg-slate-100 text-slate-600
+                     {% endif %}">
+          {{ "Actief" if v.is_active else "Inactief" }}
+        </span>
 
-            <div class="space-y-1">
-              <p class="font-semibold text-slate-900">{{ v.license_plate }}</p>
-              <p class="text-sm text-slate-500">{{ v.brand }} {{ v.model or "" }}</p>
-              <p class="text-sm text-slate-500">Capaciteit: {{ v.capacity_kg }} kg</p>
-              <p class="text-sm text-slate-500">Brandstof: {{ v.fuel_type }}</p>
-              <p class="text-sm text-slate-500">Kleur: {{ v.color }}</p>
-            </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-center text-slate-400 py-10">Nog geen voertuigen.</p>
+    {% endif %}
+</section>
 
-            <span class="px-2 py-1 rounded-full text-xs
-                         {% if v.is_active %}bg-green-100 text-green-700{% else %}bg-slate-100 text-slate-600{% endif %}">
-              {{ "Actief" if v.is_active else "Inactief" }}
-            </span>
 
-          </div>
-          {% endfor %}
-        </div>
-        {% else %}
-        <p class="text-center text-slate-400 py-10">Nog geen voertuigen.</p>
-        {% endif %}
 
-      </section>
+</div> <!-- einde tab content -->
+</div> <!-- einde tabs container -->
+</div> <!-- END main wrapper -->
 
-    </div> <!-- end tab content -->
-  </div> <!-- end tabs container -->
 
-</div> <!-- end screen -->
 
 <script>
-  const buttons = document.querySelectorAll(".tab-btn");
-  const panes = document.querySelectorAll(".tab-pane");
+const buttons = document.querySelectorAll(".tab-btn");
+const panes = document.querySelectorAll(".tab-pane");
 
-  function activateTab(tabName) {
-    buttons.forEach(b => {
-      b.classList.toggle("bg-blue-50", b.dataset.tab === tabName);
-      b.classList.toggle("text-blue-700", b.dataset.tab === tabName);
-    });
-
-    panes.forEach(p => {
-      p.classList.toggle("hidden", p.id !== "tab-" + tabName);
-    });
-  }
-
-  buttons.forEach(btn => {
-    btn.addEventListener("click", () => activateTab(btn.dataset.tab));
+function activateTab(tabName) {
+  buttons.forEach(b => {
+    b.classList.toggle("bg-blue-50", b.dataset.tab === tabName);
+    b.classList.toggle("text-blue-700", b.dataset.tab === tabName);
   });
 
-  const params = new URLSearchParams(window.location.search);
-  activateTab(params.has("q") ? "orders" : "routes");
+  panes.forEach(p => {
+    p.classList.toggle("hidden", p.id !== "tab-" + tabName);
+  });
+}
 
-  function toggleDetails(id) {
-    document.getElementById(id)?.classList.toggle("hidden");
-  }
+buttons.forEach(btn => {
+  btn.addEventListener("click", () => activateTab(btn.dataset.tab));
+});
+
+// Standaard openen: ROUTES tab
+activateTab("routes");
+
+function toggleDetails(id) {
+  document.getElementById(id)?.classList.toggle("hidden");
+}
 </script>
 
 {% endblock %}
