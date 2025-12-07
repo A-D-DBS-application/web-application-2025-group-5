@@ -238,73 +238,115 @@
 <!-- ========================================================= -->
 <!-- ORDERS TAB (volledig herstel van jouw originele inhoud) -->
 <!-- ========================================================= -->
-
 <section id="tab-orders" class="tab-pane hidden">
 
-    <div class="flex items-center justify-between mb-4">
-      <div>
-        <h2 class="text-lg font-semibold text-slate-900">Orders</h2>
-        <p class="text-sm text-slate-500">Beheer bestellingen</p>
-      </div>
+  <div class="flex items-center justify-between mb-4">
 
-      <div class="flex items-center gap-3">
-        <form method="get" action="{{ url_for('admin.dashboard') }}">
-          <input type="text" name="q"
-                 placeholder="Zoek op klant, telefoon, adres, gewicht..."
-                 value="{{ request.args.get('q', '') }}"
-                 class="px-3 py-2 rounded-lg border border-slate-300 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        </form>
-
-        <a href="{{ url_for('admin.create_order') }}"
-           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-700 text-white text-sm hover:bg-blue-800">
-          + Nieuwe Order
-        </a>
-      </div>
+    <div>
+      <h2 class="text-lg font-semibold text-slate-900">Orders</h2>
+      <p class="text-sm text-slate-500">Beheer bestellingen</p>
     </div>
 
-    {% if orders %}
-    <div class="space-y-3">
-      {% for o in orders %}
-      <div class="border border-slate-200 rounded-xl p-4 flex justify-between">
-        <div class="space-y-1">
-          <p class="font-semibold text-slate-900">Order #{{ o.order_id }}</p>
+    <div class="flex items-center gap-3">
 
-          <p class="text-sm text-slate-500">
-            Klant: {{ o.customer.customer }}
-            – {{ o.customer.street_number }},
-              {{ o.customer.postal_code }} {{ o.customer.city }}
-          </p>
+      <form method="get" action="{{ url_for('admin.dashboard') }}">
+        <input type="text" 
+               name="q"
+               placeholder="Zoek op klant, telefoon, adres, gewicht..."
+               value="{{ request.args.get('q', '') }}"
+               class="px-3 py-2 rounded-lg border border-slate-300 text-sm w-64 
+                      focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </form>
 
-          <p class="text-sm text-slate-500">
-            Tel: {{ o.customer.celphone or o.customer.phone }} |
-            Gewicht: {{ o.total_weight_kg }} kg
-          </p>
+      <a href="{{ url_for('admin.create_order') }}"
+         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-700 
+                text-white text-sm hover:bg-blue-800">
+        + Nieuwe Order
+      </a>
 
-          <p class="text-sm text-slate-500">
-            Vaten: {{ o.qty_vat }} | Flessen: {{ o.qty_fles }} | BIBs: {{ o.qty_bib }}
-          </p>
-
-          <p class="text-sm text-slate-500">
-            Leverdatum: {{ o.delivery_window_end.strftime('%d-%m-%Y') }}
-          </p>
-        </div>
-
-        <div class="flex flex-col gap-2 items-end text-xs">
-          <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700">
-            Order: {{ o.order_status }}
-          </span>
-          <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700">
-            Betaling: {{ o.payment_status }}
-          </span>
-        </div>
-      </div>
-      {% endfor %}
     </div>
-    {% else %}
-    <p class="text-center text-slate-400 py-10">Nog geen orders.</p>
-    {% endif %}
+  </div>
+
+  {% if orders %}
+  <div class="space-y-3">
+
+    {% for o in orders %}
+    <div class="border border-slate-200 rounded-xl p-4 flex justify-between">
+
+      <!-- ============== LEFT ================== -->
+      <div class="space-y-1">
+
+        <p class="font-semibold text-slate-900">
+          Order #{{ o.order_id }}
+        </p>
+
+        <p class="text-sm text-slate-500">
+          Klant: {{ o.customer.customer }} –
+          {{ o.customer.street_number }},
+          {{ o.customer.postal_code }} {{ o.customer.city }}
+        </p>
+
+        <p class="text-sm text-slate-500">
+          Tel: {{ o.customer.celphone or o.customer.phone }} |
+          Gewicht: {{ o.total_weight_kg }} kg
+        </p>
+
+        <p class="text-sm text-slate-500">
+          Vaten: {{ o.qty_vat }} |
+          Flessen: {{ o.qty_fles }} |
+          BIBs: {{ o.qty_bib }}
+        </p>
+
+        <p class="text-sm text-slate-500">
+          Leverdatum: {{ o.delivery_window_end.strftime('%d-%m-%Y') }}
+        </p>
+
+        <!-- ACTION BUTTONS -->
+        <div class="flex gap-2 pt-2">
+
+          <a href="{{ url_for('admin.edit_order', order_id=o.order_id) }}"
+             class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs hover:bg-blue-700">
+            Bewerken
+          </a>
+
+          <form method="POST"
+                action="{{ url_for('admin.delete_order', order_id=o.order_id) }}"
+                onsubmit="return confirm('Weet je zeker dat je deze order wilt verwijderen?');">
+            <button type="submit"
+                    class="px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs hover:bg-red-700">
+              Verwijderen
+            </button>
+          </form>
+
+        </div>
+
+      </div>
+
+      <!-- ============== RIGHT ================== -->
+      <div class="flex flex-col gap-2 items-end text-xs">
+
+        <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700">
+          Order: {{ o.order_status }}
+        </span>
+
+        <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700">
+          Betaling: {{ o.payment_status }}
+        </span>
+
+      </div>
+
+    </div>
+    {% endfor %}
+
+  </div>
+
+  {% else %}
+  <p class="text-center text-slate-400 py-10">
+    Nog geen orders.
+  </p>
+  {% endif %}
+
 </section>
-
 
 
 <!-- ========================================================= -->

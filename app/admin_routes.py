@@ -291,11 +291,57 @@ def assign_orders(route_id):
         available_orders=available_orders,
     )
 
+# ---------------------------
+# EDIT ROUTE
+# ---------------------------
+@admin_bp.route("/orders/<int:order_id>/edit", methods=["GET", "POST"])
+def edit_order(order_id):
+    order = Purchase_orders.query.get_or_404(order_id)
+
+    if request.method == "POST":
+        order.total_weight_kg = request.form.get("total_weight_kg")
+        order.qty_vat = request.form.get("qty_vat")
+        order.qty_fles = request.form.get("qty_fles")
+        order.qty_bib = request.form.get("qty_bib")
+
+        # Leverdatum
+        delivery_date = request.form.get("delivery_date")
+        if delivery_date:
+            order.delivery_window_end = datetime.strptime(delivery_date, "%Y-%m-%d")
+
+        # Status
+        order.order_status = request.form.get("order_status")
+        order.payment_status = request.form.get("payment_status")
+
+        db.session.commit()
+        return redirect(url_for("admin.dashboard"))
+
+    return render_template("order_edit.html", order=order)
+
+# ---------------------------
+# NA EDIT ROUTE EVENTUEEL ROUTE VERWIJDEREN
+# ---------------------------
+@admin_bp.route("/orders/<int:order_id>/delete", methods=["POST"], endpoint="delete_order")
+def delete_order(order_id):
+    if not require_admin():
+        return redirect(url_for("auth.login"))
+
+    # verwijder route links zodat er geen foreign key error komt
+    Route_Delivery.query.filter_by(order_id=order_id).delete()
+
+    # verwijder bestelling zelf
+    order = Purchase_orders.query.get_or_404(order_id)
+    db.session.delete(order)
+
+    db.session.commit()
+    flash("Order verwijderd.", "success")
+    return redirect(url_for("admin.dashboard"))
+
 
 # -------------------------------------------
 #  ROUTE VERWIJDEREN
 # -------------------------------------------
-@admin_bp.route("/routes/<int:route_id>/delete", methods=["POST"])
+@admin_bp.route("/routes/<int:route_id>/delete", methods=["POST"], endpoint="delete_route")
 def delete_route(route_id):
     if not require_admin():
         return redirect(url_for("auth.login"))
@@ -400,5 +446,4 @@ def create_user():
         return redirect(url_for("admin.dashboard"))
 
     return render_template("user_create.html")
-
 
