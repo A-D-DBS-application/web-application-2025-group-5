@@ -276,46 +276,68 @@
     <!-- ============== LEFT ================== -->
     <div class="space-y-1">
 
-      <p class="font-semibold text-slate-900">
-        Order #{{ o.order_id }}
-      </p>
+    <p class="font-semibold text-slate-900">
+      Order #{{ o.order_id }}
+    </p>
 
-      <p class="text-sm text-slate-500">
-        Klant: {{ o.customer.customer }} –
-        {{ o.customer.street_number }},
-        {{ o.customer.postal_code }} {{ o.customer.city }}
-      </p>
+    <p class="text-sm text-slate-500">
+      Klant: {{ o.customer.customer }} –
+      {{ o.customer.street_number }},
+      {{ o.customer.postal_code }} {{ o.customer.city }}
+    </p>
 
-      <p class="text-sm text-slate-500">
-        Tel: {{ o.customer.celphone or o.customer.phone }} |
-        Gewicht: {{ o.total_weight_kg }} kg
-      </p>
+    <p class="text-sm text-slate-500">
+      Tel: {{ o.customer.celphone or o.customer.phone }} |
+      Gewicht: {{ o.total_weight_kg }} kg
+    </p>
 
-      <p class="text-sm text-slate-500">
-        Vaten: {{ o.qty_vat }} |
-        Flessen: {{ o.qty_fles }} |
-        BIBs: {{ o.qty_bib }}
-      </p>
+    <p class="text-sm text-slate-500">
+      Vaten: {{ o.qty_vat }} |
+      Flessen: {{ o.qty_fles }} |
+      BIBs: {{ o.qty_bib }}
+    </p>
 
-      <p class="text-sm text-slate-500">
-        Leverdatum: {{ o.delivery_window_end.strftime('%d-%m-%Y') }}
-      </p>
+    <p class="text-sm text-slate-500">
+      Leverdatum: {{ o.delivery_window_end.strftime('%d-%m-%Y') }}
+    </p>
 
-    </div>
+  </div>
+
 
     <!-- ============== RIGHT ================== -->
     <div class="flex flex-col items-end gap-4">
 
-      <!-- STATUS BADGES -->
-      <div class="flex flex-col gap-2 text-xs">
-        <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-700">
-          Order: {{ o.order_status }}
-        </span>
+    <!-- STATUS BADGES -->
+<div class="flex flex-col gap-2 text-xs">
 
-        <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-700">
-          Betaling: {{ o.payment_status }}
-        </span>
-      </div>
+    <!-- ORDER STATUS -->
+    <span
+      class="px-3 py-1 rounded-full 
+      {% if o.order_status == 'pending' %}
+          bg-yellow-100 text-yellow-800
+      {% elif o.order_status == 'delivered' %}
+          bg-green-100 text-green-700
+      {% else %}
+          bg-red-100 text-red-700
+      {% endif %}">
+      Order: {{ o.order_status }}
+    </span>
+
+    <!-- PAYMENT STATUS -->
+    <span
+      class="px-3 py-1 rounded-full 
+      {% if o.payment_status == 'pending' %}
+          bg-yellow-100 text-yellow-800
+      {% elif o.payment_status == 'paid' %}
+          bg-green-100 text-green-700
+      {% else %}
+          bg-red-100 text-red-700
+      {% endif %}">
+      Betaling: {{ o.payment_status }}
+    </span>
+
+  </div>
+
 
       <!-- ACTIE KNOPPEN (GROOT + ONDER ELKAAR) -->
       <div class="flex flex-col gap-2 w-36">
