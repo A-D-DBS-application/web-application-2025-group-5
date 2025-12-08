@@ -11,7 +11,7 @@
 
 ## UI Prototype
 
-* Link to UI prototype goes here
+* https://route-wizard-37.lovable.app
 
 ## Kanban Board
 
