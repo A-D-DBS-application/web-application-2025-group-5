@@ -15,7 +15,7 @@
 
 ## Kanban Board
 
-* Link to the Kanban board goes here
+* https://www.canva.com/design/DAG6jw5qEkM/5FUxDVmcyR5h0UMez4I5qQ/edit?utm_content=DAG6jw5qEkM&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 
 ## Feedback Sessions
 
