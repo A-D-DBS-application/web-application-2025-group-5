@@ -289,6 +289,7 @@ def assign_orders(route_id):
         route=route,
         selected_date=selected_date,
         available_orders=available_orders,
+        capacity=route.vehicle.capacity_kg,
     )
 
 # ---------------------------
