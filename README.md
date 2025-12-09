@@ -30,7 +30,8 @@ How to run the app locally
      python3 run.py
 * 5. Open the app in your browser:
      http://127.0.0.1:5000/
-Render link:
+     
+* Render link:
   https://web-application-2025-group-5.onrender.com/login
 
 ## UI Prototype
