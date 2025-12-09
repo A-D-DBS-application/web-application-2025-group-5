@@ -96,19 +96,23 @@
   </div>
 </div>
 
-<!--  dynamische capaciteit -->
+<!-- DYNAMISCHE CAPACITEIT -->
 <script>
-const capacity = {{ capacity }};  
-let currentWeight = 0;
+const capacity = Number("{{ capacity }}");
+const baseWeight = Number("{{ current_weight }}") || 0;
+let currentWeight = baseWeight;
 
 const checkboxes = document.querySelectorAll('.order-checkbox');
 const currentWeightEl = document.getElementById('currentWeight');
 const warningEl = document.getElementById('capacityWarning');
 const submitBtn = document.getElementById('submitBtn');
 
+// Startgewicht instellen
+currentWeightEl.textContent = currentWeight.toFixed(1);
+
 checkboxes.forEach(cb => {
     cb.addEventListener('change', () => {
-        const weight = parseFloat(cb.dataset.weight);
+        const weight = parseFloat(cb.dataset.weight) || 0;
 
         if (cb.checked) {
             currentWeight += weight;
