@@ -41,13 +41,13 @@ How to run the app locally
      python3 -m venv venv
      source venv/bin/activate
      
-* 2. Install dependencies
+* 2. Install dependencies:
     pip install -r requirements.txt
 
 * 3. Create a .env file in the project root
-* 4. Start the application
+* 4. Start the application:
      python3 run.py
-* 5. Open the app in your browser
+* 5. Open the app in your browser:
      http://127.0.0.1:5000/
 
 
