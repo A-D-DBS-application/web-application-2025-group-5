@@ -171,7 +171,7 @@ def create_order():
             delivery_hour_start=hour_start_obj,
             delivery_hour_end=hour_end_obj,
             total_weight_kg=total_weight,
-            order_status=request.form.get("order_status"),
+            order_status = request.form.get("order_status", "confirmed"),
             payment_status=request.form.get("payment_status"),
             qty_vat=qty_vat,
             qty_fles=qty_fles,
