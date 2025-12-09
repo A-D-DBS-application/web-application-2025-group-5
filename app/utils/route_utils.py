@@ -1,13 +1,8 @@
 import requests
 from .mapbox_utils import MAPBOX_TOKEN
 from app.utils.mapbox_utils import geocode_address
-from scipy.optimize import linear_sum_assignment
-import numpy as np
 
 
-# --------------------------------------------------------
-#  CONFIG: Magazijnadres
-# --------------------------------------------------------
 WAREHOUSE_ADDRESS = "Industrieweg 202, 9030 Gent"
 
 # Geocode magazijn één keer
@@ -48,9 +43,6 @@ def optimize_route(distance_matrix):
 
     n = len(distance_matrix)
 
-    # --- Dummy SciPy step (prof verplicht) ---
-    cost = np.array(distance_matrix)
-    row_ind, col_ind = linear_sum_assignment(cost)
 
     # --- Echte routeberekening ---
     visited = set([0])
