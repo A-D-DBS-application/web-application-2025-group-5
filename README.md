@@ -21,6 +21,7 @@ How to run the app locally
      MacOs:
      python3 -m venv venv
      source venv/bin/activate
+     
 Render link:
 https://web-application-2025-group-5.onrender.com/login
      
