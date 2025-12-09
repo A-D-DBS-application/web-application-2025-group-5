@@ -30,8 +30,9 @@ The goal of our RoutePlanner is to simplify delivery planning, reduce errors, an
 
 ## Additional Information
 
-* How to run the app locally
+How to run the app locally
 * 1. Create and activate a virtual environment
+     
      Windows:
      python -m venv venv
      venv\Scripts\activate
