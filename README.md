@@ -22,7 +22,7 @@ How to run the app locally
      python3 -m venv venv
      source venv/bin/activate
      
-  Render link:
+  * Render link:
      https://web-application-2025-group-5.onrender.com/login
      
 * 2. Install dependencies:
