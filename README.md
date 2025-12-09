@@ -45,7 +45,7 @@ How to run the app locally
 * Link to sprint 2: https://ugentbe-my.sharepoint.com/:v:/g/personal/victorien_vermeersch_ugent_be/EcVaoNV888hKsiFzgrlSL0sBXaIhPaxLhvwppNbgLfrMjw?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D&email=Thomas.Derave%40UGent.be&e=QGRxHX 
 
 ## Project Structure
-
+```txt
 routeplanner/
 ├── app/
 │   ├── __pycache__/
