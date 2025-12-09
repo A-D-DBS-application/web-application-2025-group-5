@@ -1,0 +1,30 @@
+ADMIN
+
+As an admin, I want to create daily delivery routes and assign a driver and vehicle, so that each delivery round is clearly planned in advance.
+
+As an admin, I want to create, edit, and delete delivery orders, so that all delivery information remains accurate and up-to-date.
+
+As an admin, I want to filter orders by delivery date, status, or customer, so that I can quickly find the correct orders.
+
+As an admin, I want to see how much weight has been assigned to a route, so that I do not exceed the vehicle’s maximum capacity.
+
+As an admin, I want the orders to be automatically ordered in the most efficient delivery sequence, so that drivers can complete their route faster.
+
+As an admin, I want to create accounts for new drivers or admins, so that the platform can be used by multiple team members.
+
+As an admin, I want to add and manage delivery vehicles, including capacity and status, so that I can assign the correct vehicle to each route.
+
+As an admin, I want to see which routes are active, planned, or completed, so that I have an overview of daily operations.
+
+DRIVER
+
+As a driver, I want to view my route for today and tomorrow, so that I know which deliveries I must perform.
+
+As a driver, I want to see relevant customer details (address, phone number, type of order), so that I know exactly what to deliver.
+
+As a driver, I want to mark deliveries as completed or failed, so that the admin can monitor progress.
+
+As a driver, I want to have the opportunity to write a comment when I marked the order as delivered.
+
+As a driver, I want to follow a system-generated optimal delivery sequence, so that I complete the route efficiently.
+
