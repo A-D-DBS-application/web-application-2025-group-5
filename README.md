@@ -46,7 +46,45 @@ How to run the app locally
 
 ## Additional Information
 
-***
+#Project Structure
+
+routeplanner/
+├── app/
+│   ├── __pycache__/              # Compiled Python files (auto-generated)
+│   │
+│   ├── templates/                # HTML templates (Jinja2)
+│   │   ├── admin_dashboard.html
+│   │   ├── base.html
+│   │   ├── driver_dashboard.html
+│   │   ├── login.html
+│   │   ├── order_create.html
+│   │   ├── order_edit.html
+│   │   ├── route_assign.html
+│   │   ├── route_create.html
+│   │   ├── user_create.html
+│   │   └── vehicle_create.html
+│   │
+│   ├── utils/                    # Helper functions & extra logic
+│   │   ├── __init__.py
+│   │   ├── admin_routes.py       # Admin-related route logic
+│   │   ├── auth_routes.py        # Login, logout, authentication
+│   │   ├── driver_routes.py      # Driver dashboard & actions
+│   │   ├── preview_routes.py     # Document/preview utilities (if used)
+│   │
+│   ├── Database/                 # Database models or migrations (your naming)
+│   ├── migrations/               # Alembic or manual migration files
+│   │
+│   ├── models.py                 # SQLAlchemy ORM models
+│   ├── config.py                 # App configuration (DB, secrets, Supabase, Mapbox)
+│   └── admin_routes.py           # (Appears outside utils — your main admin logic)
+│
+├── scripts/                      # Extra scripts (optional folder)
+│
+├── requirements.txt              # Python dependencies
+├── README.md                     # Project documentation
+├── run.py                        # Application entry point (Flask runner)
+└── .gitignore                    # Ignored files for Git
+
 
 
 
