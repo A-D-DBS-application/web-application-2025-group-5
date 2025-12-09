@@ -198,12 +198,14 @@ def assign_orders(route_id):
     if not require_admin():
         return redirect(url_for("auth.login"))
 
-    # imports lokaal houden om circular imports te vermijden
     from app.utils.route_utils import get_distance_matrix, optimize_route
     from app.utils.mapbox_utils import geocode_address
 
     route = Route.query.get_or_404(route_id)
 
+    # ---------------------------------------
+    # POST – Orders opslaan + route optimaliseren
+    # ---------------------------------------
     if request.method == "POST":
         order_ids = request.form.getlist("order_ids")
 
@@ -211,16 +213,13 @@ def assign_orders(route_id):
             flash("Selecteer minstens één bestelling.", "error")
             return redirect(url_for("admin.assign_orders", route_id=route_id))
 
-        # 1. Haal orders op in de volgorde die uit het formulier komt
         orders = [Purchase_orders.query.get(int(oid)) for oid in order_ids]
 
-        # 2. Geocodeer magazijn
         warehouse_coords = geocode_address(WAREHOUSE_ADDRESS)
         if not warehouse_coords:
             flash("Magazijnadres kon niet gegeocodeerd worden.", "error")
             return redirect(url_for("admin.assign_orders", route_id=route_id))
 
-        # 3. Coördinatenlijst: [magazijn, order1, order2, ...]
         coords = [warehouse_coords]
         for o in orders:
             c = geocode_address(o.delivery_address)
@@ -229,27 +228,22 @@ def assign_orders(route_id):
                 return redirect(url_for("admin.assign_orders", route_id=route_id))
             coords.append(c)
 
-        # 4. Distance matrix berekenen
         distance_matrix = get_distance_matrix(coords)
         if not distance_matrix:
             flash("Kon distance matrix niet berekenen.", "error")
             return redirect(url_for("admin.assign_orders", route_id=route_id))
 
-        # 5. Optimale volgorde bepalen (indices over coords)
         optimal_route_indices = optimize_route(distance_matrix)
-        # Voorbeeld: [0, 2, 1, 3]  -> 0 = magazijn, 2/1/3 = orders
 
-        # 6. Oude deliveries weggooien voor deze route
+        # oude links weg
         Route_Delivery.query.filter_by(route_id=route.route_id).delete()
 
-        # 7. Nieuwe deliveries opslaan in optimale volgorde
+        # nieuwe volgorde opslaan
         seq = 1
         for idx in optimal_route_indices:
             if idx == 0:
-                # index 0 is het magazijn, die slaan we over
-                continue
+                continue  # magazijn
 
-            # idx 1 hoort bij orders[0], idx 2 bij orders[1], enz.
             order_obj = orders[idx - 1]
 
             db.session.add(Route_Delivery(
@@ -261,19 +255,35 @@ def assign_orders(route_id):
             seq += 1
 
         db.session.commit()
-        flash("Optimale route berekend (vertrekkend vanuit magazijn) en opgeslagen!", "success")
+
+        flash("Route geoptimaliseerd en opgeslagen!", "success")
         return redirect(url_for("admin.dashboard"))
 
-    # GET → toon pagina (beschikbare orders)
+    # ---------------------------------------
+    # GET – Pagina tonen
+    # ---------------------------------------
+
     delivery_date = request.args.get("delivery_date")
     if delivery_date:
         try:
             selected_date = datetime.strptime(delivery_date, "%Y-%m-%d").date()
-        except ValueError:
+        except:
             selected_date = route.route_date
     else:
         selected_date = route.route_date
 
+    # ✓ Orders die al op de route zitten
+    assigned_orders = (
+        Purchase_orders.query
+        .join(Route_Delivery, Purchase_orders.order_id == Route_Delivery.order_id)
+        .filter(Route_Delivery.route_id == route.route_id)
+        .all()
+    )
+
+    # ✓ Huidig totaalgewicht
+    current_weight = sum(float(o.total_weight_kg or 0) for o in assigned_orders)
+
+    # ✓ Orders die nog beschikbaar zijn
     available_orders = (
         Purchase_orders.query
         .filter(
@@ -288,12 +298,19 @@ def assign_orders(route_id):
         "route_assign.html",
         route=route,
         selected_date=selected_date,
+        assigned_orders=assigned_orders,
         available_orders=available_orders,
-        capacity=route.vehicle.capacity_kg,
+        current_weight=current_weight,
+        capacity=float(route.vehicle.capacity_kg),
     )
+
+
 
 # ---------------------------
 # EDIT ROUTE
+# ---------------------------
+# ---------------------------
+# EDIT ORDER
 # ---------------------------
 @admin_bp.route("/orders/<int:order_id>/edit", methods=["GET", "POST"])
 def edit_order(order_id):
@@ -319,8 +336,9 @@ def edit_order(order_id):
 
     return render_template("order_edit.html", order=order)
 
+
 # ---------------------------
-# NA EDIT ROUTE EVENTUEEL ROUTE VERWIJDEREN
+# DELETE ORDER
 # ---------------------------
 @admin_bp.route("/orders/<int:order_id>/delete", methods=["POST"], endpoint="delete_order")
 def delete_order(order_id):
@@ -340,7 +358,7 @@ def delete_order(order_id):
 
 
 # -------------------------------------------
-#  ROUTE VERWIJDEREN
+# DELETE ROUTE
 # -------------------------------------------
 @admin_bp.route("/routes/<int:route_id>/delete", methods=["POST"], endpoint="delete_route")
 def delete_route(route_id):
@@ -356,7 +374,7 @@ def delete_route(route_id):
 
 
 # -------------------------------------------
-#  KLANT ZOEKFUNCTIE (AJAX)
+# KLANT ZOEKFUNCTIE (AJAX)
 # -------------------------------------------
 @admin_bp.route("/customers/search")
 def search_customers():
@@ -388,7 +406,7 @@ def search_customers():
 
 
 # -------------------------------------------
-#  NIEUW VOERTUIG
+# NIEUW VOERTUIG
 # -------------------------------------------
 @admin_bp.route("/vehicles/new", methods=["GET", "POST"])
 def create_vehicle():
@@ -416,7 +434,7 @@ def create_vehicle():
 
 
 # -------------------------------------------
-#  NIEUWE USER
+# NIEUWE USER
 # -------------------------------------------
 @admin_bp.route("/users/new", methods=["GET", "POST"])
 def create_user():
@@ -447,4 +465,3 @@ def create_user():
         return redirect(url_for("admin.dashboard"))
 
     return render_template("user_create.html")
-
