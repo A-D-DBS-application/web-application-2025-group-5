@@ -44,15 +44,13 @@ How to run the app locally
 * Link to sprint 1: https://ugentbe-my.sharepoint.com/:v:/g/personal/victorien_vermeersch_ugent_be/Edi2W6wGy7JMpKB3N8SnxFYBPhff8iLoWZdP1yW2dYCQpg?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=k76rMe
 * Link to sprint 2: https://ugentbe-my.sharepoint.com/:v:/g/personal/victorien_vermeersch_ugent_be/EcVaoNV888hKsiFzgrlSL0sBXaIhPaxLhvwppNbgLfrMjw?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D&email=Thomas.Derave%40UGent.be&e=QGRxHX 
 
-## Additional Information
-
-#Project Structure
+## Project Structure
 
 routeplanner/
 ├── app/
-│   ├── __pycache__/              # Compiled Python files (auto-generated)
+│   ├── __pycache__/              
 │   │
-│   ├── templates/                # HTML templates (Jinja2)
+│   ├── templates/                
 │   │   ├── admin_dashboard.html
 │   │   ├── base.html
 │   │   ├── driver_dashboard.html
@@ -64,27 +62,28 @@ routeplanner/
 │   │   ├── user_create.html
 │   │   └── vehicle_create.html
 │   │
-│   ├── utils/                    # Helper functions & extra logic
+│   ├── utils/                    
 │   │   ├── __init__.py
-│   │   ├── admin_routes.py       # Admin-related route logic
-│   │   ├── auth_routes.py        # Login, logout, authentication
-│   │   ├── driver_routes.py      # Driver dashboard & actions
-│   │   ├── preview_routes.py     # Document/preview utilities (if used)
+│   │   ├── admin_routes.py       
+│   │   ├── auth_routes.py        
+│   │   ├── driver_routes.py      
+│   │   ├── preview_routes.py     
 │   │
-│   ├── Database/                 # Database models or migrations (your naming)
-│   ├── migrations/               # Alembic or manual migration files
+│   ├── Database/                 
+│   ├── migrations/               
 │   │
-│   ├── models.py                 # SQLAlchemy ORM models
-│   ├── config.py                 # App configuration (DB, secrets, Supabase, Mapbox)
-│   └── admin_routes.py           # (Appears outside utils — your main admin logic)
+│   ├── models.py                
+│   ├── config.py                
+│   └── admin_routes.py           
 │
-├── scripts/                      # Extra scripts (optional folder)
+├── scripts/                      
 │
-├── requirements.txt              # Python dependencies
-├── README.md                     # Project documentation
-├── run.py                        # Application entry point (Flask runner)
-└── .gitignore                    # Ignored files for Git
+├── requirements.txt              
+├── README.md                     
+├── run.py                        
+└── .gitignore                   
 
+## Additional Information
 
 
 
