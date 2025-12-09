@@ -48,9 +48,9 @@ How to run the app locally
 
 routeplanner/
 ├── app/
-│   ├── __pycache__/              
+│   ├── __pycache__/
 │   │
-│   ├── templates/                
+│   ├── templates/
 │   │   ├── admin_dashboard.html
 │   │   ├── base.html
 │   │   ├── driver_dashboard.html
@@ -62,26 +62,27 @@ routeplanner/
 │   │   ├── user_create.html
 │   │   └── vehicle_create.html
 │   │
-│   ├── utils/                    
+│   ├── utils/
 │   │   ├── __init__.py
-│   │   ├── admin_routes.py       
-│   │   ├── auth_routes.py        
-│   │   ├── driver_routes.py      
-│   │   ├── preview_routes.py     
+│   │   ├── admin_routes.py
+│   │   ├── auth_routes.py
+│   │   ├── driver_routes.py
+│   │   └── preview_routes.py
 │   │
-│   ├── Database/                 
-│   ├── migrations/               
+│   ├── Database/
+│   ├── migrations/
 │   │
-│   ├── models.py                
-│   ├── config.py                
-│   └── admin_routes.py           
+│   ├── models.py
+│   ├── config.py
+│   └── admin_routes.py
 │
-├── scripts/                      
+├── scripts/
 │
-├── requirements.txt              
-├── README.md                     
-├── run.py                        
-└── .gitignore                   
+├── requirements.txt
+├── README.md
+├── run.py
+└── .gitignore
+              
 
 ## Additional Information
 
