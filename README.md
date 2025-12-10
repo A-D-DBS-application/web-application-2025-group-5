@@ -10,7 +10,7 @@ This RoutePlanner also optimizes the sequence of stops, making routes shorter an
 The goal of our RoutePlanner is to simplify delivery planning, reduce errors, and create a smoother workflow between the office and drivers on the road.
 
 ## Features
-
+```txt
 *Role-based login for Admins and Drivers.
 *Order management: create, edit, delete, search, and filter orders.
 *Route planning: create routes, assign drivers/vehicles, and calculate total route weight.
@@ -19,6 +19,7 @@ The goal of our RoutePlanner is to simplify delivery planning, reduce errors, an
 *Automatic status updates for orders and routes (pending / delivered).
 *Driver dashboard showing today’s and tomorrow’s routes with customer details.
 *Vehicle management: register and manage vehicle data and capacity.
+```
 
 ## Installation & Usage
 
