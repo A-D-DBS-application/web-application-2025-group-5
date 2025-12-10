@@ -459,29 +459,64 @@
 
 
 <script>
+/* ======================================================
+   TAB SYSTEEM MET ONTHOUDEN VAN ACTIEVE TAB
+   ====================================================== */
+
 const buttons = document.querySelectorAll(".tab-btn");
 const panes = document.querySelectorAll(".tab-pane");
 
+// Laad laatst opgeslagen tab, anders default "routes"
+let savedTab = localStorage.getItem("activeTab") || "routes";
+activateTab(savedTab);
+
 function activateTab(tabName) {
+
+  // Style updates
   buttons.forEach(b => {
     b.classList.toggle("bg-blue-50", b.dataset.tab === tabName);
     b.classList.toggle("text-blue-700", b.dataset.tab === tabName);
   });
 
+  // Content toggles
   panes.forEach(p => {
     p.classList.toggle("hidden", p.id !== "tab-" + tabName);
   });
+
+  // Opslaan zodat tab niet reset bij refresh / zoekactie
+  localStorage.setItem("activeTab", tabName);
 }
 
+// Klikken → activeTab updaten
 buttons.forEach(btn => {
   btn.addEventListener("click", () => activateTab(btn.dataset.tab));
 });
 
-// Standaard openen: ROUTES tab
-activateTab("routes");
-
+/* ======================================================
+   UITKLAP DETAILS
+   ====================================================== */
 function toggleDetails(id) {
   document.getElementById(id)?.classList.toggle("hidden");
+}
+
+
+/* ======================================================
+   LIVE RESET VOOR ORDER ZOEKVELD
+   ====================================================== */
+
+const orderSearchInput = document.querySelector('input[name="q"]');
+
+if (orderSearchInput) {
+    orderSearchInput.addEventListener("input", function () {
+        const value = this.value.trim();
+
+        // Als zoekveld leeg → reset orders
+        if (value === "") {
+            const baseUrl = window.location.pathname;
+            window.history.replaceState({}, "", baseUrl);
+            window.location.reload();
+        }
+    });
 }
 </script>
 
