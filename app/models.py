@@ -2,20 +2,21 @@
 from datetime import datetime
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
+from flask_login import UserMixin
 from . import db
 
 
 # -----------------------------------------------------
 # USERS
 # -----------------------------------------------------
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = "users"
 
     user_id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.Text, nullable=False, unique=True)
     password_hash = db.Column(db.Text)
     name = db.Column(db.Text, nullable=False)
-    role = db.Column(db.String(50), nullable=False)
+    roles = db.Column(db.String(200), default="admin")  
     is_active = db.Column(db.Boolean, nullable=False, default=True)
 
     street_number = db.Column(db.Text, nullable=False)
@@ -30,12 +31,43 @@ class User(db.Model):
         onupdate=db.func.now(),
     )
 
+    def get_id(self):
+        return str(self.user_id)
+
+
     # RELATIONSHIPS
     created_routes = relationship("Route", foreign_keys="Route.created_by_user_id")
     driven_routes = relationship("Route", foreign_keys="Route.driver_id")
 
     def __repr__(self):
         return f"<User {self.name}>"
+    
+
+    def get_roles(self):
+        """Geeft een lijst terug, bv ['admin','driver']."""
+        if not self.roles:
+            return []
+        return [r.strip().lower() for r in self.roles.split(",") if r.strip()]
+
+    def has_role(self, role_name: str) -> bool:
+        """Checkt of user deze rol heeft."""
+        return role_name.lower() in self.get_roles()
+
+    def add_role(self, role_name: str):
+        """Voegt rol toe als hij deze nog niet heeft."""
+        role_name = role_name.lower()
+        roles = self.get_roles()
+        if role_name not in roles:
+            roles.append(role_name)
+            self.roles = ",".join(roles)
+
+    def remove_role(self, role_name: str):
+        """Verwijdert een rol uit de lijst."""
+        role_name = role_name.lower()
+        roles = self.get_roles()
+        if role_name in roles:
+            roles.remove(role_name)
+            self.roles = ",".join(roles)
 
 
 # -----------------------------------------------------

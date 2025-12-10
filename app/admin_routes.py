@@ -1,29 +1,30 @@
 from datetime import date, datetime
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, abort
 from sqlalchemy import or_
+from flask_login import current_user, login_required
 from .models import Route, User, Vehicle, PurchaseOrders, Customer, RouteDelivery
 from . import db
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
-# Magazijnadres (vertrekpunt voor alle routes)
 WAREHOUSE_ADDRESS = "Industrieweg 202, 9030 Gent"
 
 
 # -------------------------------------------
-#  Protect admin routes
+#  Protect admin routes (multi-role versie)
 # -------------------------------------------
 def require_admin():
-    if session.get("role") != "admin":
+    if not current_user.is_authenticated or not current_user.has_role("admin"):
         flash("Je hebt geen toegang tot dit gedeelte.", "error")
         return False
     return True
 
 
 # -------------------------------------------
-#  DASHBOARD MET DATUMFILTER + ZOEKFUNCTIE
+#  DASHBOARD
 # -------------------------------------------
 @admin_bp.route("/dashboard")
+@login_required
 def dashboard():
     if not require_admin():
         return redirect(url_for("auth.login"))
@@ -42,10 +43,17 @@ def dashboard():
             pass
 
     routes = routes_query.all()
-    drivers = User.query.filter_by(role="driver", is_active=True).all()
+
+    # ✓ Drivers (personen met rol 'driver')
+    drivers = User.query.filter(User.roles.contains("driver"), User.is_active == True).all()
+
     vehicles = Vehicle.query.filter_by(is_active=True).all()
 
-    # --- ORDER ZOEKFILTER ---
+    # Alle users ophalen voor USERS-tab
+    users = User.query.order_by(User.name.asc()).all()
+
+
+    # -------------- ORDER SEARCH --------------
     search_raw = request.args.get("q")
     search = (search_raw or "").strip()
 
@@ -83,6 +91,8 @@ def dashboard():
         )
     else:
         orders = PurchaseOrders.query.order_by(PurchaseOrders.created_at.desc()).all()
+    
+    all_users = User.query.order_by(User.created_at.desc()).all()
 
     return render_template(
         "admin_dashboard.html",
@@ -90,11 +100,13 @@ def dashboard():
         routes=routes,
         drivers=drivers,
         vehicles=vehicles,
+        users=users,
         orders=orders,
         total_orders=PurchaseOrders.query.count(),
         pending_orders=PurchaseOrders.query.filter_by(order_status="pending").count(),
         active_routes=Route.query.filter(Route.route_status != "completed").count(),
         selected_route_date=date_obj,
+        all_users=all_users,
     )
 
 
@@ -102,6 +114,7 @@ def dashboard():
 #  ROUTE AANMAKEN
 # -------------------------------------------
 @admin_bp.route("/routes/new", methods=["GET", "POST"])
+@login_required
 def create_route():
     if not require_admin():
         return redirect(url_for("auth.login"))
@@ -118,7 +131,7 @@ def create_route():
         route = Route(
             driver_id=driver_id,
             vehicle_id=vehicle_id or None,
-            created_by_user_id=session["user_id"],
+            created_by_user_id=current_user.user_id,
             route_date=route_date,
             route_status="planned",
         )
@@ -129,9 +142,11 @@ def create_route():
         flash("Route succesvol aangemaakt!", "success")
         return redirect(url_for("admin.dashboard"))
 
+    drivers = User.query.filter(User.roles.contains("driver"), User.is_active == True).all()
+
     return render_template(
         "route_create.html",
-        drivers=User.query.filter_by(role="driver", is_active=True).all(),
+        drivers=drivers,
         vehicles=Vehicle.query.filter_by(is_active=True).all(),
     )
 
@@ -140,11 +155,13 @@ def create_route():
 #  ORDER AANMAKEN
 # -------------------------------------------
 @admin_bp.route("/orders/new", methods=["GET", "POST"])
+@login_required
 def create_order():
     if not require_admin():
         return redirect(url_for("auth.login"))
 
     if request.method == "POST":
+
         customer_id = request.form.get("customer_id")
         delivery_address = request.form.get("delivery_address")
         delivery_phone = request.form.get("delivery_phone")
@@ -171,7 +188,7 @@ def create_order():
             delivery_hour_start=hour_start_obj,
             delivery_hour_end=hour_end_obj,
             total_weight_kg=total_weight,
-            order_status = request.form.get("order_status", "confirmed"),
+            order_status=request.form.get("order_status", "confirmed"),
             payment_status=request.form.get("payment_status"),
             qty_vat=qty_vat,
             qty_fles=qty_fles,
@@ -191,9 +208,10 @@ def create_order():
 
 
 # -------------------------------------------
-#  ORDERS TOEWIJZEN + OPTIMALISEREN (MET MAGAZIJN)
+#  ORDERS TOEWIJZEN + ROUTE OPTIMALISATIE
 # -------------------------------------------
 @admin_bp.route("/routes/<int:route_id>/assign", methods=["GET", "POST"])
+@login_required
 def assign_orders(route_id):
     if not require_admin():
         return redirect(url_for("auth.login"))
@@ -203,9 +221,7 @@ def assign_orders(route_id):
 
     route = Route.query.get_or_404(route_id)
 
-    # ---------------------------------------
-    # POST – Orders opslaan + route optimaliseren
-    # ---------------------------------------
+    # POST ------------------------------
     if request.method == "POST":
         order_ids = request.form.getlist("order_ids")
 
@@ -217,7 +233,7 @@ def assign_orders(route_id):
 
         warehouse_coords = geocode_address(WAREHOUSE_ADDRESS)
         if not warehouse_coords:
-            flash("Magazijnadres kon niet gegeocodeerd worden.", "error")
+            flash("Magazijnadres kon niet gevonden worden.", "error")
             return redirect(url_for("admin.assign_orders", route_id=route_id))
 
         coords = [warehouse_coords]
@@ -235,17 +251,13 @@ def assign_orders(route_id):
 
         optimal_route_indices = optimize_route(distance_matrix)
 
-        # oude links weg
         RouteDelivery.query.filter_by(route_id=route.route_id).delete()
 
-        # nieuwe volgorde opslaan
         seq = 1
         for idx in optimal_route_indices:
             if idx == 0:
-                continue  # magazijn
-
+                continue
             order_obj = orders[idx - 1]
-
             db.session.add(RouteDelivery(
                 route_id=route.route_id,
                 order_id=order_obj.order_id,
@@ -256,12 +268,10 @@ def assign_orders(route_id):
 
         db.session.commit()
 
-        flash("Route geoptimaliseerd en opgeslagen!", "success")
+        flash("Route geoptimaliseerd!", "success")
         return redirect(url_for("admin.dashboard"))
 
-    # ---------------------------------------
-    # GET – Pagina tonen
-    # ---------------------------------------
+    # GET ------------------------------
 
     delivery_date = request.args.get("delivery_date")
     if delivery_date:
@@ -272,7 +282,6 @@ def assign_orders(route_id):
     else:
         selected_date = route.route_date
 
-    # ✓ Orders die al op de route zitten
     assigned_orders = (
         PurchaseOrders.query
         .join(RouteDelivery, PurchaseOrders.order_id == RouteDelivery.order_id)
@@ -280,10 +289,8 @@ def assign_orders(route_id):
         .all()
     )
 
-    # ✓ Huidig totaalgewicht
     current_weight = sum(float(o.total_weight_kg or 0) for o in assigned_orders)
 
-    # ✓ Orders die nog beschikbaar zijn
     available_orders = (
         PurchaseOrders.query
         .filter(
@@ -305,15 +312,15 @@ def assign_orders(route_id):
     )
 
 
-
-# ---------------------------
-# EDIT ROUTE
-# ---------------------------
-# ---------------------------
-# EDIT ORDER
-# ---------------------------
+# -------------------------------------------
+# UPDATE ORDER
+# -------------------------------------------
 @admin_bp.route("/orders/<int:order_id>/edit", methods=["GET", "POST"])
+@login_required
 def edit_order(order_id):
+    if not require_admin():
+        return redirect(url_for("auth.login"))
+
     order = PurchaseOrders.query.get_or_404(order_id)
 
     if request.method == "POST":
@@ -322,37 +329,35 @@ def edit_order(order_id):
         order.qty_fles = request.form.get("qty_fles")
         order.qty_bib = request.form.get("qty_bib")
 
-        # Leverdatum
         delivery_date = request.form.get("delivery_date")
         if delivery_date:
             order.delivery_window_end = datetime.strptime(delivery_date, "%Y-%m-%d")
 
-        # Status
         order.order_status = request.form.get("order_status")
         order.payment_status = request.form.get("payment_status")
 
         db.session.commit()
+        flash("Order bijgewerkt!", "success")
         return redirect(url_for("admin.dashboard"))
 
     return render_template("order_edit.html", order=order)
 
 
-# ---------------------------
+# -------------------------------------------
 # DELETE ORDER
-# ---------------------------
-@admin_bp.route("/orders/<int:order_id>/delete", methods=["POST"], endpoint="delete_order")
+# -------------------------------------------
+@admin_bp.route("/orders/<int:order_id>/delete", methods=["POST"])
+@login_required
 def delete_order(order_id):
     if not require_admin():
         return redirect(url_for("auth.login"))
 
-    # verwijder route links zodat er geen foreign key error komt
     RouteDelivery.query.filter_by(order_id=order_id).delete()
 
-    # verwijder bestelling zelf
     order = PurchaseOrders.query.get_or_404(order_id)
     db.session.delete(order)
-
     db.session.commit()
+
     flash("Order verwijderd.", "success")
     return redirect(url_for("admin.dashboard"))
 
@@ -360,7 +365,8 @@ def delete_order(order_id):
 # -------------------------------------------
 # DELETE ROUTE
 # -------------------------------------------
-@admin_bp.route("/routes/<int:route_id>/delete", methods=["POST"], endpoint="delete_route")
+@admin_bp.route("/routes/<int:route_id>/delete", methods=["POST"])
+@login_required
 def delete_route(route_id):
     if not require_admin():
         return redirect(url_for("auth.login"))
@@ -374,9 +380,10 @@ def delete_route(route_id):
 
 
 # -------------------------------------------
-# KLANT ZOEKFUNCTIE (AJAX)
+# CUSTOMER SEARCH (AJAX)
 # -------------------------------------------
 @admin_bp.route("/customers/search")
+@login_required
 def search_customers():
     if not require_admin():
         return jsonify([])
@@ -406,9 +413,10 @@ def search_customers():
 
 
 # -------------------------------------------
-# NIEUW VOERTUIG
+# VOERTUIG AANMAKEN
 # -------------------------------------------
 @admin_bp.route("/vehicles/new", methods=["GET", "POST"])
+@login_required
 def create_vehicle():
     if not require_admin():
         return redirect(url_for("auth.login"))
@@ -432,11 +440,11 @@ def create_vehicle():
 
     return render_template("vehicle_create.html")
 
-
 # -------------------------------------------
-# NIEUWE USER
+# USER AANMAKEN (multi-role)
 # -------------------------------------------
 @admin_bp.route("/users/new", methods=["GET", "POST"])
+@login_required
 def create_user():
     if not require_admin():
         return redirect(url_for("auth.login"))
@@ -444,18 +452,24 @@ def create_user():
     if request.method == "POST":
         name = request.form.get("name")
         email = request.form.get("email")
-        role = request.form.get("role")
+        selected_roles = request.form.getlist("roles")
 
-        if not name or not email or not role:
-            flash("Alle velden verplicht.", "error")
+        if not name or not email or not selected_roles:
+            flash("Naam, email en minstens één rol verplicht.", "error")
             return redirect(url_for("admin.create_user"))
 
+        roles_str = ",".join(selected_roles)
+
+        # FIXED ❗ Removed invalid db.Column() assignments
         user = User(
-            name=name,
-            email=email,
+            name=name.strip(),
+            email=email.strip(),
             password_hash="",
-            role=role,
+            roles=roles_str,
             is_active=True,
+            street_number="", 
+            postal_code="", 
+            city="", 
         )
 
         db.session.add(user)
@@ -464,4 +478,75 @@ def create_user():
         flash("Gebruiker aangemaakt!", "success")
         return redirect(url_for("admin.dashboard"))
 
-    return render_template("user_create.html")
+    return render_template("user_create.html", user_roles=["admin", "driver"])
+
+
+# -------------------------------------------
+# USER ACTIEF / INACTIEF ZETTEN
+# -------------------------------------------
+@admin_bp.route("/users/<int:user_id>/toggle", methods=["POST"])
+@login_required
+def toggle_user_active(user_id):
+    if not require_admin():
+        return redirect(url_for("auth.login"))
+
+    user = User.query.get_or_404(user_id)
+
+    if user.user_id == current_user.user_id:
+        flash("Je kunt je eigen account niet deactiveren.", "error")
+        return redirect(url_for("admin.dashboard"))
+
+    user.is_active = not user.is_active
+    db.session.commit()
+
+    flash(f"Gebruiker {'geactiveerd' if user.is_active else 'gedeactiveerd'}!", "success")
+    return redirect(url_for("admin.dashboard"))
+
+
+# -------------------------------------------
+# USER BEWERKEN
+# -------------------------------------------
+@admin_bp.route("/users/<int:user_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_user(user_id):
+    if not require_admin():
+        return redirect(url_for("auth.login"))
+
+    user = User.query.get_or_404(user_id)
+
+    if request.method == "POST":
+        user.name = request.form.get("name") or user.name
+        user.email = request.form.get("email") or user.email
+
+        selected_roles = request.form.getlist("roles")
+        user.roles = ",".join(selected_roles) if selected_roles else ""
+
+        user.is_active = ("is_active" in request.form)
+
+        db.session.commit()
+        flash("Gebruiker bijgewerkt!", "success")
+        return redirect(url_for("admin.dashboard"))
+
+    return render_template("user_edit.html", user=user)
+
+
+# -------------------------------------------
+# USER VERWIJDEREN
+# -------------------------------------------
+@admin_bp.route("/users/<int:user_id>/delete", methods=["POST"])
+@login_required
+def delete_user(user_id):
+    if not require_admin():
+        return redirect(url_for("auth.login"))
+
+    if current_user.user_id == user_id:
+        flash("Je kunt je eigen account niet verwijderen.", "error")
+        return redirect(url_for("admin.dashboard"))
+
+    user = User.query.get_or_404(user_id)
+    db.session.delete(user)
+    db.session.commit()
+
+    flash("Gebruiker verwijderd.", "success")
+    return redirect(url_for("admin.dashboard"))
+

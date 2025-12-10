@@ -21,11 +21,24 @@
         </div>
     </div>
 
-    <a href="{{ url_for('auth.logout') }}"
-       class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 text-sm hover:bg-slate-100">
-      Uitloggen
-    </a>
+    <div class="flex items-center gap-3">
+        
+        {% if current_user.has_role('driver') %}
+        <a href="{{ url_for('driver.dashboard') }}"
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-600 
+                  bg-blue-50 text-blue-700 text-sm hover:bg-blue-100">
+            Naar Driver Dashboard
+        </a>
+        {% endif %}
+
+        <a href="{{ url_for('auth.logout') }}"
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 
+                  bg-white text-slate-700 text-sm hover:bg-slate-100">
+          Uitloggen
+        </a>
+    </div>
 </div>
+
 
 <!-- STATS -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -54,7 +67,7 @@
 <a href="{{ url_for('admin.create_user') }}"
    class="block bg-white p-6 rounded-xl shadow hover:shadow-lg transition border border-gray-200 mb-6">
     <h3 class="text-lg font-medium text-gray-900 mb-1">Nieuw Account</h3>
-    <p class="text-gray-500 text-sm">Maak een nieuwe admin of driver aan</p>
+    <p class="text-gray-500 text-sm">Maak een nieuwe admin en/of driver aan</p>
 </a>
 
 <!-- TABS -->
@@ -62,13 +75,16 @@
 
 <!-- TAB HEADERS -->
 <div class="border-b border-slate-200 px-4 pt-3">
-    <div class="flex gap-4">
+    <div class="flex gap-4 overflow-x-auto">
 
         <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-blue-700 bg-blue-50"
                 data-tab="routes">Routes</button>
 
         <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-slate-600"
                 data-tab="orders">Bestellingen</button>
+
+        <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-slate-600"
+                data-tab="users">Users</button>
 
         <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-slate-600"
                 data-tab="drivers">Drivers</button>
@@ -83,7 +99,7 @@
 
 
 <!-- ========================================================= -->
-<!--  ROUTES TAB (nieuwe + delivered + comment support) -->
+<!--  ROUTES TAB -->
 <!-- ========================================================= -->
 <section id="tab-routes" class="tab-pane">
 
@@ -100,7 +116,7 @@
     </div>
 
     <!-- FILTER -->
-    <form method="get" action="{{ url_for('admin.dashboard') }}" class="mb-6 flex items-end gap-3">
+    <form method="get" action="{{ url_for('admin.dashboard') }}" class="mb-6 flex items-end gap-3 flex-wrap">
         <div>
             <label class="text-sm font-medium text-slate-600 mb-1 block">
                 Filter op datum:
@@ -153,13 +169,15 @@
                 </span>
               {% endif %}
             </p>
+
+            {# Totaal gewicht per route berekenen #}
             <p class="text-sm text-gray-500">
-              Totaal gewicht: 
-              <strong>{{ r.total_weight }} kg</strong>
+              Totaal gewicht:
+              <strong>{{ "%.2f"|format(r.total_weight or 0) }} kg</strong>
             </p>
           </div>
 
-          <div class="flex gap-2">
+          <div class="flex gap-2 flex-wrap">
             <a href="{{ url_for('admin.assign_orders', route_id=r.route_id) }}"
                class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
               Bestellingen toewijzen
@@ -182,12 +200,9 @@
         </button>
 
         <div id="route-{{ r.route_id }}"
-             class="hidden mt-3 ml-2 border-l-2
-                    border-gray-300 pl-4">
+             class="hidden mt-3 ml-2 border-l-2 border-gray-300 pl-4">
 
           {% if r.deliveries %}
-            {% set comments = [] %}
-
             {% for d in r.deliveries %}
             <div class="mb-2">
 
@@ -213,16 +228,12 @@
                       <strong>Commentaar driver:</strong>
                       <span class="text-red-600">{{ d.delivery_comment }}</span>
                   </p>
-                  {% set _ = comments.append(d.delivery_comment) %}
                 {% endif %}
 
               </div>
 
             </div>
             {% endfor %}
-
-        
-
           {% else %}
             <p class="text-gray-400 text-sm">Geen bestellingen.</p>
           {% endif %}
@@ -240,11 +251,11 @@
 
 
 <!-- ========================================================= -->
-<!-- ORDERS TAB (volledig herstel van jouw originele inhoud) -->
+<!-- ORDERS TAB -->
 <!-- ========================================================= -->
 <section id="tab-orders" class="tab-pane hidden">
 
-  <div class="flex items-center justify-between mb-4">
+  <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
 
     <div>
       <h2 class="text-lg font-semibold text-slate-900">Orders</h2>
@@ -275,9 +286,9 @@
 <div class="space-y-3">
 
   {% for o in orders %}
-  <div class="border border-slate-200 rounded-xl p-4 flex justify-between">
+  <div class="border border-slate-200 rounded-xl p-4 flex justify-between flex-wrap gap-4">
 
-    <!-- ============== LEFT ================== -->
+    <!-- LEFT -->
     <div class="space-y-1">
 
     <p class="font-semibold text-slate-900">
@@ -307,43 +318,39 @@
 
   </div>
 
-
-    <!-- ============== RIGHT ================== -->
+    <!-- RIGHT -->
     <div class="flex flex-col items-end gap-4">
 
-    <!-- STATUS BADGES -->
-<div class="flex flex-col gap-2 text-xs">
+      <!-- STATUS BADGES -->
+      <div class="flex flex-col gap-2 text-xs">
 
-    <!-- ORDER STATUS -->
-    <span
-      class="px-3 py-1 rounded-full 
-      {% if o.order_status == 'pending' %}
-          bg-yellow-100 text-yellow-800
-      {% elif o.order_status == 'delivered' %}
-          bg-green-100 text-green-700
-      {% else %}
-          bg-red-100 text-red-700
-      {% endif %}">
-      Order: {{ o.order_status }}
-    </span>
+        <span
+          class="px-3 py-1 rounded-full 
+          {% if o.order_status == 'pending' %}
+              bg-yellow-100 text-yellow-800
+          {% elif o.order_status == 'delivered' %}
+              bg-green-100 text-green-700
+          {% else %}
+              bg-red-100 text-red-700
+          {% endif %}">
+          Order: {{ o.order_status }}
+        </span>
 
-    <!-- PAYMENT STATUS -->
-    <span
-      class="px-3 py-1 rounded-full 
-      {% if o.payment_status == 'pending' %}
-          bg-yellow-100 text-yellow-800
-      {% elif o.payment_status == 'paid' %}
-          bg-green-100 text-green-700
-      {% else %}
-          bg-red-100 text-red-700
-      {% endif %}">
-      Betaling: {{ o.payment_status }}
-    </span>
+        <span
+          class="px-3 py-1 rounded-full 
+          {% if o.payment_status == 'pending' %}
+              bg-yellow-100 text-yellow-800
+          {% elif o.payment_status == 'paid' %}
+              bg-green-100 text-green-700
+          {% else %}
+              bg-red-100 text-red-700
+          {% endif %}">
+          Betaling: {{ o.payment_status }}
+        </span>
 
-  </div>
+      </div>
 
-
-      <!-- ACTIE KNOPPEN (GROOT + ONDER ELKAAR) -->
+      <!-- ACTIE KNOPPEN -->
       <div class="flex flex-col gap-2 w-36">
 
         <a href="{{ url_for('admin.edit_order', order_id=o.order_id) }}"
@@ -376,22 +383,139 @@
 
 
 <!-- ========================================================= -->
-<!-- DRIVERS TAB (volledig herstel) -->
+<!-- USERS TAB (GEOPTIMALISEERD) -->
 <!-- ========================================================= -->
+<section id="tab-users" class="tab-pane hidden">
 
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+    <div>
+      <h2 class="text-lg font-semibold text-slate-900">Users</h2>
+      <p class="text-sm text-slate-500">Beheer alle gebruikers & rollen</p>
+    </div>
+
+    <a href="{{ url_for('admin.create_user') }}"
+       class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-700 text-white text-sm hover:bg-blue-800">
+      + Nieuw Account
+    </a>
+  </div>
+
+  {% if users %}
+  <div class="space-y-3">
+
+    {% for u in users %}
+    <div class="border border-slate-200 rounded-xl p-4 flex justify-between flex-wrap gap-4">
+
+      <!-- User Info -->
+      <div class="space-y-1">
+        <p class="font-semibold text-slate-900">{{ u.name }}</p>
+        <p class="text-sm text-slate-500">{{ u.email }}</p>
+
+        <!-- Roles & Status -->
+        <div class="flex flex-wrap gap-2 mt-2 text-xs">
+
+          {% for role in u.get_roles() %}
+            <span class="px-2 py-1 rounded-full 
+              {% if role == 'admin' %} bg-blue-100 text-blue-700
+              {% elif role == 'driver' %} bg-emerald-100 text-emerald-700
+              {% endif %}">
+              {{ role.capitalize() }}
+            </span>
+          {% endfor %}
+
+          {% if not u.get_roles() %}
+            <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-600">
+              Geen rollen
+            </span>
+          {% endif %}
+
+          <!-- Active status -->
+          <span class="px-2 py-1 rounded-full 
+            {{ 'bg-green-100 text-green-700' if u.is_active else 'bg-red-100 text-red-700' }}">
+            {{ "Actief" if u.is_active else "Geblokkeerd" }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex flex-col items-end gap-2 w-40">
+
+        <!-- Edit -->
+        <a href="{{ url_for('admin.edit_user', user_id=u.user_id) }}"
+           class="px-3 py-2 rounded-lg bg-blue-600 text-white text-xs text-center hover:bg-blue-700">
+          Bewerken
+        </a>
+
+        <!-- Toggle active -->
+        <form method="POST"
+              action="{{ url_for('admin.toggle_user_active', user_id=u.user_id) }}">
+          <button type="submit"
+              class="px-3 py-2 rounded-lg text-xs w-full
+                     {{ 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' if u.is_active 
+                        else 'bg-green-100 text-green-700 hover:bg-green-200' }}">
+            {{ "Deactiveer" if u.is_active else "Activeer" }}
+          </button>
+        </form>
+
+        <!-- Delete -->
+        {% if current_user.user_id != u.user_id %}
+        <form method="POST"
+              action="{{ url_for('admin.delete_user', user_id=u.user_id) }}"
+              onsubmit="return confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?');">
+          <button type="submit"
+                  class="px-3 py-2 rounded-lg bg-red-600 text-white text-xs w-full hover:bg-red-700">
+            Verwijderen
+          </button>
+        </form>
+        {% endif %}
+
+      </div>
+
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+    <p class="text-center text-slate-400 py-10">Nog geen gebruikers.</p>
+  {% endif %}
+
+</section>
+
+
+<!-- ========================================================= -->
+<!-- DRIVERS TAB -->
+<!-- ========================================================= -->
 <section id="tab-drivers" class="tab-pane hidden">
     <div class="mb-4">
       <h2 class="text-lg font-semibold text-slate-900">Drivers</h2>
-      <p class="text-sm text-slate-500">Overzicht van alle drivers</p>
+      <p class="text-sm text-slate-500">Overzicht van alle gebruikers met driver-rol</p>
     </div>
 
     {% if drivers %}
     <div class="space-y-3">
       {% for d in drivers %}
-      <div class="border border-slate-200 rounded-xl p-4 flex justify-between">
-        <p class="font-semibold text-slate-900">{{ d.name }}</p>
+      <div class="border border-slate-200 rounded-xl p-4 flex justify-between flex-wrap gap-4">
+        <div>
+          <p class="font-semibold text-slate-900">{{ d.name }}</p>
+          <p class="text-sm text-slate-500">{{ d.email }}</p>
+
+          {% set roles = d.get_roles() %}
+          <div class="flex flex-wrap gap-2 mt-2 text-xs">
+            {% if "driver" in roles %}
+            <span class="px-2 py-1 rounded-full bg-emerald-100 text-emerald-700">
+              Driver
+            </span>
+            {% endif %}
+            {% if "admin" in roles %}
+            <span class="px-2 py-1 rounded-full bg-blue-100 text-blue-700">
+              Admin
+            </span>
+            {% endif %}
+          </div>
+        </div>
+
         <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700 text-xs">
-          Driver
+          {{ "Actief" if d.is_active else "Inactief" }}
         </span>
       </div>
       {% endfor %}
@@ -404,11 +528,10 @@
 
 
 <!-- ========================================================= -->
-<!-- VEHICLES TAB (volledig herstel) -->
+<!-- VEHICLES TAB -->
 <!-- ========================================================= -->
-
 <section id="tab-vehicles" class="tab-pane hidden">
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center justify_between mb-4">
       <div>
         <h2 class="text-lg font-semibold text-slate-900">Voertuigen</h2>
         <p class="text-sm text-slate-500">Beheer alle voertuigen</p>
@@ -423,7 +546,7 @@
     {% if vehicles %}
     <div class="space-y-3">
       {% for v in vehicles %}
-      <div class="border border-slate-200 rounded-xl p-4 flex justify-between">
+      <div class="border border-slate-200 rounded-xl p-4 flex justify-between flex-wrap gap-4">
 
         <div class="space-y-1">
           <p class="font-semibold text-slate-900">{{ v.license_plate }}</p>
@@ -457,7 +580,6 @@
 </div> <!-- END main wrapper -->
 
 
-
 <script>
 /* ======================================================
    TAB SYSTEEM MET ONTHOUDEN VAN ACTIEVE TAB
@@ -466,28 +588,23 @@
 const buttons = document.querySelectorAll(".tab-btn");
 const panes = document.querySelectorAll(".tab-pane");
 
-// Laad laatst opgeslagen tab, anders default "routes"
 let savedTab = localStorage.getItem("activeTab") || "routes";
 activateTab(savedTab);
 
 function activateTab(tabName) {
 
-  // Style updates
   buttons.forEach(b => {
     b.classList.toggle("bg-blue-50", b.dataset.tab === tabName);
     b.classList.toggle("text-blue-700", b.dataset.tab === tabName);
   });
 
-  // Content toggles
   panes.forEach(p => {
     p.classList.toggle("hidden", p.id !== "tab-" + tabName);
   });
 
-  // Opslaan zodat tab niet reset bij refresh / zoekactie
   localStorage.setItem("activeTab", tabName);
 }
 
-// Klikken → activeTab updaten
 buttons.forEach(btn => {
   btn.addEventListener("click", () => activateTab(btn.dataset.tab));
 });
@@ -499,7 +616,6 @@ function toggleDetails(id) {
   document.getElementById(id)?.classList.toggle("hidden");
 }
 
-
 /* ======================================================
    LIVE RESET VOOR ORDER ZOEKVELD
    ====================================================== */
@@ -509,8 +625,6 @@ const orderSearchInput = document.querySelector('input[name="q"]');
 if (orderSearchInput) {
     orderSearchInput.addEventListener("input", function () {
         const value = this.value.trim();
-
-        // Als zoekveld leeg → reset orders
         if (value === "") {
             const baseUrl = window.location.pathname;
             window.history.replaceState({}, "", baseUrl);
