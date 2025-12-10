@@ -47,6 +47,8 @@
                     {% endif %}
                 </p>
                 <p><strong>Status:</strong> {{ route_today.route_status }}</p>
+                <p><strong>Totaal gewicht:</strong> {{ route_today.total_weight }} kg</p>
+
             </div>
         </div>
 
@@ -155,6 +157,8 @@
                 {% endif %}
             </p>
             <p><strong>Status:</strong> {{ route_tomorrow.route_status }}</p>
+            <p><strong>Totaal gewicht:</strong> {{ route_tomorrow.total_weight }} kg</p>
+
         </div>
 
         <h3 class="text-lg font-semibold mb-4">Stops voor morgen</h3>

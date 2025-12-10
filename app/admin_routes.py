@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 from sqlalchemy import or_
-from .models import Route, User, Vehicle, Purchase_orders, Customer, Route_Delivery
+from .models import Route, User, Vehicle, PurchaseOrders, Customer, RouteDelivery
 from . import db
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -55,10 +55,10 @@ def dashboard():
     if search:
         pattern = f"%{search}%"
         filters = [
-            Purchase_orders.delivery_address.ilike(pattern),
-            Purchase_orders.delivery_phone.ilike(pattern),
-            Purchase_orders.order_status.ilike(pattern),
-            Purchase_orders.payment_status.ilike(pattern),
+            PurchaseOrders.delivery_address.ilike(pattern),
+            PurchaseOrders.delivery_phone.ilike(pattern),
+            PurchaseOrders.order_status.ilike(pattern),
+            PurchaseOrders.payment_status.ilike(pattern),
             Customer.first_name.ilike(pattern),
             Customer.last_name.ilike(pattern),
             Customer.customer.ilike(pattern),
@@ -68,21 +68,21 @@ def dashboard():
         if search.isdigit():
             num = int(search)
             filters += [
-                Purchase_orders.order_id == num,
-                Purchase_orders.total_weight_kg == num,
+                PurchaseOrders.order_id == num,
+                PurchaseOrders.total_weight_kg == num,
             ]
         else:
-            filters.append(Purchase_orders.order_id.cast(db.Text).ilike(pattern))
+            filters.append(PurchaseOrders.order_id.cast(db.Text).ilike(pattern))
 
         orders = (
-            Purchase_orders.query
+            PurchaseOrders.query
             .join(Customer)
             .filter(or_(*filters))
-            .order_by(Purchase_orders.created_at.desc())
+            .order_by(PurchaseOrders.created_at.desc())
             .all()
         )
     else:
-        orders = Purchase_orders.query.order_by(Purchase_orders.created_at.desc()).all()
+        orders = PurchaseOrders.query.order_by(PurchaseOrders.created_at.desc()).all()
 
     return render_template(
         "admin_dashboard.html",
@@ -91,8 +91,8 @@ def dashboard():
         drivers=drivers,
         vehicles=vehicles,
         orders=orders,
-        total_orders=Purchase_orders.query.count(),
-        pending_orders=Purchase_orders.query.filter_by(order_status="pending").count(),
+        total_orders=PurchaseOrders.query.count(),
+        pending_orders=PurchaseOrders.query.filter_by(order_status="pending").count(),
         active_routes=Route.query.filter(Route.route_status != "completed").count(),
         selected_route_date=date_obj,
     )
@@ -162,7 +162,7 @@ def create_order():
 
         total_weight = qty_vat * 65 + qty_fles * 1.5 + qty_bib * 4
 
-        order = Purchase_orders(
+        order = PurchaseOrders(
             customer_id=customer_id,
             delivery_address=delivery_address,
             delivery_phone=delivery_phone,
@@ -213,7 +213,7 @@ def assign_orders(route_id):
             flash("Selecteer minstens één bestelling.", "error")
             return redirect(url_for("admin.assign_orders", route_id=route_id))
 
-        orders = [Purchase_orders.query.get(int(oid)) for oid in order_ids]
+        orders = [PurchaseOrders.query.get(int(oid)) for oid in order_ids]
 
         warehouse_coords = geocode_address(WAREHOUSE_ADDRESS)
         if not warehouse_coords:
@@ -236,7 +236,7 @@ def assign_orders(route_id):
         optimal_route_indices = optimize_route(distance_matrix)
 
         # oude links weg
-        Route_Delivery.query.filter_by(route_id=route.route_id).delete()
+        RouteDelivery.query.filter_by(route_id=route.route_id).delete()
 
         # nieuwe volgorde opslaan
         seq = 1
@@ -246,7 +246,7 @@ def assign_orders(route_id):
 
             order_obj = orders[idx - 1]
 
-            db.session.add(Route_Delivery(
+            db.session.add(RouteDelivery(
                 route_id=route.route_id,
                 order_id=order_obj.order_id,
                 sequence=seq,
@@ -274,9 +274,9 @@ def assign_orders(route_id):
 
     # ✓ Orders die al op de route zitten
     assigned_orders = (
-        Purchase_orders.query
-        .join(Route_Delivery, Purchase_orders.order_id == Route_Delivery.order_id)
-        .filter(Route_Delivery.route_id == route.route_id)
+        PurchaseOrders.query
+        .join(RouteDelivery, PurchaseOrders.order_id == RouteDelivery.order_id)
+        .filter(RouteDelivery.route_id == route.route_id)
         .all()
     )
 
@@ -285,12 +285,12 @@ def assign_orders(route_id):
 
     # ✓ Orders die nog beschikbaar zijn
     available_orders = (
-        Purchase_orders.query
+        PurchaseOrders.query
         .filter(
-            db.func.date(Purchase_orders.delivery_window_end) == selected_date,
-            ~Purchase_orders.route_links.any()
+            db.func.date(PurchaseOrders.delivery_window_end) == selected_date,
+            ~PurchaseOrders.route_links.any()
         )
-        .order_by(Purchase_orders.order_id.asc())
+        .order_by(PurchaseOrders.order_id.asc())
         .all()
     )
 
@@ -314,7 +314,7 @@ def assign_orders(route_id):
 # ---------------------------
 @admin_bp.route("/orders/<int:order_id>/edit", methods=["GET", "POST"])
 def edit_order(order_id):
-    order = Purchase_orders.query.get_or_404(order_id)
+    order = PurchaseOrders.query.get_or_404(order_id)
 
     if request.method == "POST":
         order.total_weight_kg = request.form.get("total_weight_kg")
@@ -346,10 +346,10 @@ def delete_order(order_id):
         return redirect(url_for("auth.login"))
 
     # verwijder route links zodat er geen foreign key error komt
-    Route_Delivery.query.filter_by(order_id=order_id).delete()
+    RouteDelivery.query.filter_by(order_id=order_id).delete()
 
     # verwijder bestelling zelf
-    order = Purchase_orders.query.get_or_404(order_id)
+    order = PurchaseOrders.query.get_or_404(order_id)
     db.session.delete(order)
 
     db.session.commit()
@@ -365,7 +365,7 @@ def delete_route(route_id):
     if not require_admin():
         return redirect(url_for("auth.login"))
 
-    Route_Delivery.query.filter_by(route_id=route_id).delete()
+    RouteDelivery.query.filter_by(route_id=route_id).delete()
     Route.query.filter_by(route_id=route_id).delete()
 
     db.session.commit()
