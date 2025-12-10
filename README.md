@@ -52,7 +52,9 @@ https://web-application-2025-group-5.onrender.com/login
 
 ## Kanban Board
 
-* https://www.canva.com/design/DAG6jw5qEkM/5FUxDVmcyR5h0UMez4I5qQ/edit?utm_content=DAG6jw5qEkM&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
+Starting from Sprint 2, our team began using a structured kanban board to manage and track the development workflow.
+The board is divided into three stages — To Do, In Progress, and Complete — and includes all major features of the RoutePlanner application.
+* https://miro.com/app/board/uXjVGdBdw2o=/?share_link_id=509268197018
 
 ## Feedback Sessions
 
