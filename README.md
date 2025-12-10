@@ -9,6 +9,17 @@ We made a practical web application that helps businesses organize and manage th
 This RoutePlanner also optimizes the sequence of stops, making routes shorter and more efficient. Drivers receive a clear overview of their tasks, including customer details, delivery addresses, and the order in which they should complete their stops. This makes it easier for them to follow the route and update progress throughout the day.
 The goal of our RoutePlanner is to simplify delivery planning, reduce errors, and create a smoother workflow between the office and drivers on the road.
 
+## Features
+
+*Role-based login for Admins and Drivers.
+*Order management: create, edit, delete, search, and filter orders.
+*Route planning: create routes, assign drivers/vehicles, and calculate total route weight.
+*Automatic route optimization: drivers receive the shortest and most logical delivery route.
+*Delivery workflow: drivers mark deliveries as completed and add comments.
+*Automatic status updates for orders and routes (pending / delivered).
+*Driver dashboard showing today’s and tomorrow’s routes with customer details.
+*Vehicle management: register and manage vehicle data and capacity.
+
 ## Installation & Usage
 
 How to run the app locally
