@@ -5,8 +5,8 @@
 ## Description
 
 We made a practical web application that helps businesses organize and manage their daily deliveries with ease. The platform allows admins to create routes, assign drivers and vehicles, and select the right orders for each delivery round. It automatically calculates the total weight of all assigned orders and ensures that the vehicle’s maximum capacity is never exceeded.
-This RoutePlanner also optimizes the sequence of stops, making routes shorter and more efficient. Drivers receive a clear overview of their tasks, including customer details, delivery addresses, and the order in which they should complete their stops. This makes it easier for them to follow the route and update progress throughout the day.
-The goal of our RoutePlanner is to simplify delivery planning, reduce errors, and create a smoother workflow between the office and drivers on the road.
+Wineway also optimizes the sequence of stops, making routes shorter and more efficient. Drivers receive a clear overview of their tasks, including customer details, delivery addresses, and the order in which they should complete their stops. This makes it easier for them to follow the route and update progress throughout the day.
+The goal of Wineway is to simplify delivery planning, reduce errors, and create a smoother workflow between the office and drivers on the road.
 
 ## Features
 
@@ -34,7 +34,8 @@ How to run the app locally
      source venv/bin/activate
      
 * 2. Install dependencies:
-    pip install -r requirements.txt
+     pip install flask-login
+     pip install -r requirements.txt
 
 * 3. Create a .env file in the project root
 * 4. Start the application:
