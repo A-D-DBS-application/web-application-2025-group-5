@@ -47,7 +47,7 @@ def dashboard():
     # ✓ Drivers (personen met rol 'driver')
     drivers = User.query.filter(User.roles.contains("driver"), User.is_active == True).all()
 
-    vehicles = Vehicle.query.filter_by(is_active=True).all()
+    vehicles = Vehicle.query.order_by(Vehicle.license_plate.asc()).all()
 
     # Alle users ophalen voor USERS-tab
     users = User.query.order_by(User.name.asc()).all()
@@ -441,6 +441,71 @@ def create_vehicle():
     return render_template("vehicle_create.html")
 
 # -------------------------------------------
+# VOERTUIG STATUS TOGGLE (NIEUW)
+# -------------------------------------------
+@admin_bp.route("/vehicles/<int:vehicle_id>/toggle", methods=["POST"])
+@login_required
+def toggle_vehicle_status(vehicle_id):
+    if not require_admin():
+        return redirect(url_for("auth.login"))
+
+    vehicle = Vehicle.query.get_or_404(vehicle_id)
+    vehicle.is_active = not vehicle.is_active
+    db.session.commit()
+
+    flash(f"Voertuig is nu {'actief' if vehicle.is_active else 'inactief'}.", "success")
+    return redirect(url_for("admin.dashboard"))
+
+# -------------------------------------------
+# VOERTUIG BEWERKEN (NIEUW)
+# -------------------------------------------
+@admin_bp.route("/vehicles/<int:vehicle_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_vehicle(vehicle_id):
+    if not require_admin():
+        return redirect(url_for("auth.login"))
+
+    vehicle = Vehicle.query.get_or_404(vehicle_id)
+
+    if request.method == "POST":
+        vehicle.license_plate = request.form.get("license_plate")
+        vehicle.brand = request.form.get("brand")
+        vehicle.model = request.form.get("model")
+        vehicle.color = request.form.get("color")
+        vehicle.capacity_kg = request.form.get("capacity_kg")
+        vehicle.fuel_type = request.form.get("fuel_type")
+        vehicle.is_active = ("is_active" in request.form)
+
+        db.session.commit()
+        flash("Voertuig bijgewerkt!", "success")
+        return redirect(url_for("admin.dashboard"))
+
+    return render_template("vehicle_edit.html", vehicle=vehicle)
+
+# -------------------------------------------
+# VOERTUIG VERWIJDEREN (NIEUW)
+# -------------------------------------------
+@admin_bp.route("/vehicles/<int:vehicle_id>/delete", methods=["POST"])
+@login_required
+def delete_vehicle(vehicle_id):
+    if not require_admin():
+        return redirect(url_for("auth.login"))
+
+    vehicle = Vehicle.query.get_or_404(vehicle_id)
+
+    # Prevent deletion if linked to routes
+    if Route.query.filter_by(vehicle_id=vehicle_id).count() > 0:
+        flash("Kan voertuig niet verwijderen: gekoppeld aan routes.", "error")
+        return redirect(url_for("admin.dashboard"))
+
+    db.session.delete(vehicle)
+    db.session.commit()
+
+    flash("Voertuig verwijderd.", "success")
+    return redirect(url_for("admin.dashboard"))
+
+
+# -------------------------------------------
 # USER AANMAKEN (multi-role)
 # -------------------------------------------
 @admin_bp.route("/users/new", methods=["GET", "POST"])
@@ -549,4 +614,3 @@ def delete_user(user_id):
 
     flash("Gebruiker verwijderd.", "success")
     return redirect(url_for("admin.dashboard"))
-

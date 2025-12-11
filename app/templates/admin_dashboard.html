@@ -526,59 +526,80 @@
 </section>
 
 
-
 <!-- ========================================================= -->
 <!-- VEHICLES TAB -->
 <!-- ========================================================= -->
 <section id="tab-vehicles" class="tab-pane hidden">
-    <div class="flex items-center justify_between mb-4">
-      <div>
-        <h2 class="text-lg font-semibold text-slate-900">Voertuigen</h2>
-        <p class="text-sm text-slate-500">Beheer alle voertuigen</p>
-      </div>
+    <div class="flex items-center justify-between mb-4">
+        <div>
+            <h2 class="text-lg font-semibold text-slate-900">Voertuigen</h2>
+            <p class="text-sm text-slate-500">Beheer alle voertuigen</p>
+        </div>
 
-      <a href="{{ url_for('admin.create_vehicle') }}"
-         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-700 text-white text-sm hover:bg-blue-800">
-        + Nieuw Voertuig
-      </a>
+        <a href="{{ url_for('admin.create_vehicle') }}"
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-700 text-white text-sm hover:bg-blue-800">
+            + Nieuw Voertuig
+        </a>
     </div>
 
     {% if vehicles %}
     <div class="space-y-3">
-      {% for v in vehicles %}
-      <div class="border border-slate-200 rounded-xl p-4 flex justify-between flex-wrap gap-4">
 
-        <div class="space-y-1">
-          <p class="font-semibold text-slate-900">{{ v.license_plate }}</p>
-          <p class="text-sm text-slate-500">{{ v.brand }} {{ v.model or "" }}</p>
-          <p class="text-sm text-slate-500">Capaciteit: {{ v.capacity_kg }} kg</p>
-          <p class="text-sm text-slate-500">Brandstof: {{ v.fuel_type }}</p>
-          <p class="text-sm text-slate-500">Kleur: {{ v.color }}</p>
+        {% for v in vehicles %}
+        <div class="border border-slate-200 rounded-xl p-4 flex justify-between items-center">
+
+            <!-- Linkerkant: voertuiginfo -->
+            <div class="space-y-1">
+                <p class="font-semibold text-slate-900">{{ v.license_plate }}</p>
+                <p class="text-sm text-slate-500">{{ v.brand }} {{ v.model or "" }}</p>
+                <p class="text-sm text-slate-500">Capaciteit: {{ v.capacity_kg }} kg</p>
+                <p class="text-sm text-slate-500">Brandstof: {{ v.fuel_type }}</p>
+                <p class="text-sm text-slate-500">Kleur: {{ v.color }}</p>
+            </div>
+
+            <!-- Rechterkant: actieknoppen -->
+            <div class="flex flex-col items-end gap-2">
+
+                <!-- STATUS TOGGLE BUTTON -->
+                <form method="POST"
+                      action="{{ url_for('admin.toggle_vehicle_status', vehicle_id=v.vehicle_id) }}">
+                    <button type="submit"
+                            class="px-3 py-1 rounded-full text-xs font-medium transition
+                                   {% if v.is_active %}
+                                     bg-green-100 text-green-700 hover:bg-green-200
+                                   {% else %}
+                                     bg-slate-200 text-slate-600 hover:bg-slate-300
+                                   {% endif %}">
+                        {{ "Actief" if v.is_active else "Inactief" }}
+                    </button>
+                </form>
+
+                <!-- BEWERKEN -->
+                <a href="{{ url_for('admin.edit_vehicle', vehicle_id=v.vehicle_id) }}"
+                   class="px-3 py-1 text-xs rounded-md bg-blue-600 text-white hover:bg-blue-700">
+                    Bewerken
+                </a>
+
+                <!-- VERWIJDEREN -->
+                <form method="POST"
+                      action="{{ url_for('admin.delete_vehicle', vehicle_id=v.vehicle_id) }}"
+                      onsubmit="return confirm('Weet je zeker dat je dit voertuig wilt verwijderen?');">
+                    <button type="submit"
+                            class="px-3 py-1 text-xs rounded-md bg-red-600 text-white hover:bg-red-700">
+                        Verwijderen
+                    </button>
+                </form>
+
+            </div>
+
         </div>
+        {% endfor %}
 
-        <span class="px-2 py-1 rounded-full text-xs
-                     {% if v.is_active %}
-                       bg-green-100 text-green-700
-                     {% else %}
-                       bg-slate-100 text-slate-600
-                     {% endif %}">
-          {{ "Actief" if v.is_active else "Inactief" }}
-        </span>
-
-      </div>
-      {% endfor %}
     </div>
     {% else %}
     <p class="text-center text-slate-400 py-10">Nog geen voertuigen.</p>
     {% endif %}
 </section>
-
-
-
-</div> <!-- einde tab content -->
-</div> <!-- einde tabs container -->
-</div> <!-- END main wrapper -->
-
 
 <script>
 /* ======================================================
