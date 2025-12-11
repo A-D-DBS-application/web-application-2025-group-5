@@ -90,8 +90,8 @@ def dashboard():
             .all()
         )
     else:
-        orders = PurchaseOrders.query.order_by(PurchaseOrders.created_at.desc()).all()
-    
+        orders = PurchaseOrders.query.order_by(PurchaseOrders.order_id.desc()).all()
+
     all_users = User.query.order_by(User.created_at.desc()).all()
 
     return render_template(
