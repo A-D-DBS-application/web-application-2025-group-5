@@ -34,7 +34,8 @@ How to run the app locally
      source venv/bin/activate
      
 * 2. Install dependencies:
-    pip install -r requirements.txt
+     pip install flask-login
+     pip install -r requirements.txt
 
 * 3. Create a .env file in the project root
 * 4. Start the application:
