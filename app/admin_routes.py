@@ -229,15 +229,32 @@ def assign_orders(route_id):
             flash("Selecteer minstens één bestelling.", "error")
             return redirect(url_for("admin.assign_orders", route_id=route_id))
 
-        orders = [PurchaseOrders.query.get(int(oid)) for oid in order_ids]
+        # Nieuwe orders (die je net hebt aangevinkt in het formulier)
+        new_orders = [PurchaseOrders.query.get(int(oid)) for oid in order_ids]
 
+        # Bestaande orders die al in deze route zitten (uit de database)
+        existing_links = RouteDelivery.query.filter_by(route_id=route.route_id).all()
+        existing_orders = [link.order for link in existing_links]
+
+        # Dubbels vermijden: als een order al in de route zat, niet nog eens als "nieuw" toevoegen
+        existing_ids = {o.order_id for o in existing_orders}
+        really_new_orders = [o for o in new_orders if o and o.order_id not in existing_ids]
+
+        # Alle orders samen: oude + echt nieuwe
+        all_orders = existing_orders + really_new_orders
+
+        if not all_orders:
+            flash("Er zijn geen orders om in deze route op te nemen.", "error")
+            return redirect(url_for("admin.assign_orders", route_id=route_id))
+
+        # --- GEOCODING ---
         warehouse_coords = geocode_address(WAREHOUSE_ADDRESS)
         if not warehouse_coords:
             flash("Magazijnadres kon niet gevonden worden.", "error")
             return redirect(url_for("admin.assign_orders", route_id=route_id))
 
         coords = [warehouse_coords]
-        for o in orders:
+        for o in all_orders:
             c = geocode_address(o.delivery_address)
             if not c:
                 flash(f"Adres niet gevonden: {o.delivery_address}", "error")
@@ -251,13 +268,17 @@ def assign_orders(route_id):
 
         optimal_route_indices = optimize_route(distance_matrix)
 
+        # Alle oude koppelingen van deze route weghalen
         RouteDelivery.query.filter_by(route_id=route.route_id).delete()
 
+        # En nu de route opnieuw opbouwen met ALLE orders (oud + nieuw)
         seq = 1
         for idx in optimal_route_indices:
             if idx == 0:
-                continue
-            order_obj = orders[idx - 1]
+                continue  # index 0 is het magazijn
+
+            order_obj = all_orders[idx - 1]
+
             db.session.add(RouteDelivery(
                 route_id=route.route_id,
                 order_id=order_obj.order_id,
@@ -268,20 +289,20 @@ def assign_orders(route_id):
 
         db.session.commit()
 
-        flash("Route geoptimaliseerd!", "success")
+        flash("Route geoptimaliseerd (bestaande orders behouden).", "success")
         return redirect(url_for("admin.dashboard"))
 
     # GET ------------------------------
-
     delivery_date = request.args.get("delivery_date")
     if delivery_date:
         try:
             selected_date = datetime.strptime(delivery_date, "%Y-%m-%d").date()
-        except:
+        except ValueError:
             selected_date = route.route_date
     else:
         selected_date = route.route_date
 
+    # Orders die al aan deze route hangen
     assigned_orders = (
         PurchaseOrders.query
         .join(RouteDelivery, PurchaseOrders.order_id == RouteDelivery.order_id)
@@ -289,8 +310,10 @@ def assign_orders(route_id):
         .all()
     )
 
+    # Huidig totaal gewicht van de route
     current_weight = sum(float(o.total_weight_kg or 0) for o in assigned_orders)
 
+    # Orders die nog NIET aan een route hangen en op deze dag geleverd worden
     available_orders = (
         PurchaseOrders.query
         .filter(
@@ -310,6 +333,8 @@ def assign_orders(route_id):
         current_weight=current_weight,
         capacity=float(route.vehicle.capacity_kg),
     )
+
+
 
 
 # -------------------------------------------
@@ -360,6 +385,28 @@ def delete_order(order_id):
 
     flash("Order verwijderd.", "success")
     return redirect(url_for("admin.dashboard"))
+
+# -------------------------------------------
+# ORDER UIT ROUTE VERWIJDEREN (order blijft bestaan)
+# -------------------------------------------
+@admin_bp.route("/routes/<int:route_id>/orders/<int:order_id>/remove", methods=["POST"])
+@login_required
+def remove_order_from_route(route_id, order_id):
+    if not require_admin():
+        return redirect(url_for("auth.login"))
+
+    # Zoek de koppeling (RouteDelivery) tussen deze route en deze bestelling
+    link = RouteDelivery.query.filter_by(
+        route_id=route_id,
+        order_id=order_id
+    ).first_or_404()
+
+    db.session.delete(link)
+    db.session.commit()
+
+    flash("Bestelling uit route verwijderd (order blijft bestaan).", "success")
+    return redirect(url_for("admin.assign_orders", route_id=route_id))
+
 
 
 # -------------------------------------------
