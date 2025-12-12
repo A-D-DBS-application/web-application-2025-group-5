@@ -99,67 +99,91 @@
 
 
 <!-- ========================================================= -->
-<!--  ROUTES TAB (GEUPDATED MET 'UIT ROUTE HALEN')            -->
+<!--  ROUTES TAB                                              -->
 <!-- ========================================================= -->
 <section id="tab-routes" class="tab-pane">
 
-    <div class="flex items-center justify-between mb-4">
-        <div>
-            <h2 class="text-lg font-semibold text-slate-900">Routes</h2>
-            <p class="text-sm text-slate-500">Beheer dagelijkse routes</p>
-        </div>
-
-        <a href="{{ url_for('admin.create_route') }}"
-           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-700 text-white text-sm hover:bg-blue-800">
-          + Nieuwe Route
-        </a>
+  <div class="flex items-center justify-between mb-4">
+    <div>
+      <h2 class="text-lg font-semibold text-slate-900">Routes</h2>
+      <p class="text-sm text-slate-500">Beheer dagelijkse routes</p>
     </div>
 
-    <!-- FILTER -->
-    <form method="get" action="{{ url_for('admin.dashboard') }}" class="mb-6 flex items-end gap-3 flex-wrap">
-        <div>
-            <label class="text-sm font-medium text-slate-600 mb-1 block">Filter op datum:</label>
-            <input type="date" name="route_date"
-                   value="{{ selected_route_date.isoformat() if selected_route_date }}"
-                   class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
-        </div>
+    <a href="{{ url_for('admin.create_route') }}"
+       class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-700 text-white text-sm hover:bg-blue-800">
+      + Nieuwe Route
+    </a>
+  </div>
 
-        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">Filter</button>
+  <!-- FILTER -->
+  <form method="get"
+        action="{{ url_for('admin.dashboard') }}"
+        class="mb-6 flex items-end gap-3 flex-wrap">
 
-        {% if selected_route_date %}
-        <a href="{{ url_for('admin.dashboard') }}"
-           class="px-4 py-2 rounded-lg text-sm bg-gray-200 text-gray-700 hover:bg-gray-300">
-          Reset
-        </a>
-        {% endif %}
-    </form>
+    <div>
+      <label class="text-sm font-medium text-slate-600 mb-1 block">
+        Filter op datum:
+      </label>
+      <input type="date"
+             name="route_date"
+             value="{{ selected_route_date.isoformat() if selected_route_date }}"
+             class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
+    </div>
 
-    {% if routes %}
-      {% for r in routes %}
+    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
+      Filter
+    </button>
+
+    {% if selected_route_date %}
+      <a href="{{ url_for('admin.dashboard') }}"
+         class="px-4 py-2 rounded-lg text-sm bg-gray-200 text-gray-700 hover:bg-gray-300">
+        Reset
+      </a>
+    {% endif %}
+  </form>
+
+  {% if routes %}
+    {% for r in routes %}
+
+      {% set problem_orders = r.deliveries
+        |selectattr("delivery_status", "equalto", "not_delivered")
+        |list %}
+
+      {% set delivered_count = r.deliveries
+        |selectattr("delivery_status", "equalto", "delivered")
+        |list
+        |length %}
+
+      {% set all_delivered = r.deliveries|length > 0 and delivered_count == r.deliveries|length %}
 
       <div class="bg-white border border-gray-200 rounded-xl p-4 mb-3 shadow-sm">
 
-        <!-- HEADER -->
-        <div class="flex justify-between items-start">
-          <div>
-
+        <!-- ROUTE HEADER -->
+        <div class="flex justify-between items-start gap-6">
+          <div class="flex-1">
             <p class="font-semibold text-gray-900">
               {{ r.route_date.strftime('%d/%m/%Y') }} – {{ r.driver.name }}
             </p>
 
             <p class="text-sm text-gray-500">
-              Voertuig: {{ r.vehicle.license_plate if r.vehicle else "Geen voertuig" }}
+              Voertuig:
+              {{ r.vehicle.license_plate if r.vehicle else "Geen voertuig" }}
             </p>
-
-            {% set delivered_count = r.deliveries|selectattr("delivery_status", "equalto", "delivered")|list|length %}
-            {% set all_delivered = r.deliveries|length > 0 and delivered_count == r.deliveries|length %}
 
             <p class="text-sm text-gray-500">
               Status:
-              {% if all_delivered %}
-                <span class="px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs">delivered</span>
+              {% if problem_orders %}
+                <span class="px-2 py-1 rounded-full bg-red-100 text-red-700 text-xs">
+                  problemen
+                </span>
+              {% elif all_delivered %}
+                <span class="px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs">
+                  delivered
+                </span>
               {% else %}
-                <span class="px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs">planned</span>
+                <span class="px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs">
+                  planned
+                </span>
               {% endif %}
             </p>
 
@@ -167,16 +191,33 @@
               Totaal gewicht:
               <strong>{{ "%.2f"|format(r.total_weight or 0) }} kg</strong>
             </p>
+
+            <!-- ⚠ PROBLEEM ORDERS IN HEADER -->
+            {% if problem_orders %}
+              <div class="mt-2 p-3 rounded-lg bg-red-50 border border-red-200">
+                <p class="text-sm font-semibold text-red-700 mb-1">
+                  ⚠ Niet geleverd:
+                </p>
+                <div class="flex flex-wrap gap-2">
+                  {% for d in problem_orders %}
+                    <span class="px-2 py-1 rounded-full bg-red-100 text-red-700 text-xs">
+                      Order #{{ d.order_id }}
+                    </span>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
           </div>
 
+          <!-- ROUTE ACTIES -->
           <div class="flex gap-2 flex-wrap">
             <a href="{{ url_for('admin.assign_orders', route_id=r.route_id) }}"
                class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
               Bestellingen toewijzen
             </a>
 
-            <form action="{{ url_for('admin.delete_route', route_id=r.route_id) }}"
-                  method="post"
+            <form method="post"
+                  action="{{ url_for('admin.delete_route', route_id=r.route_id) }}"
                   onsubmit="return confirm('Ben je zeker dat je deze route wil verwijderen?');">
               <button class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm">
                 Route verwijderen
@@ -185,7 +226,7 @@
           </div>
         </div>
 
-        <!-- UITKLAP -->
+        <!-- UITKLAP ROUTE -->
         <button onclick="toggleDetails('route-{{ r.route_id }}')"
                 class="mt-3 w-full text-left text-blue-600 font-medium hover:underline text-sm">
           ▼ Toon orders
@@ -196,51 +237,77 @@
 
           {% if r.deliveries %}
             {% for d in r.deliveries %}
-            <div class="mb-2 flex justify-between items-start gap-3">
+              <div class="mb-3 flex justify-between items-start gap-3">
 
-              <!-- LINKERDEEL: INFO -->
-              <div>
-                <button onclick="toggleDetails('order-{{ d.order_id }}')"
-                        class="text-gray-900 font-medium hover:underline text-sm">
-                  • Order #{{ d.order_id }}
-                </button>
+                <!-- LINKERDEEL: ORDER TITEL + UITKLAP -->
+                <div class="flex-1">
+                  <button onclick="toggleDetails('order-{{ r.route_id }}-{{ d.order_id }}')"
+                          class="text-gray-900 font-medium hover:underline text-sm">
+                    • Order #{{ d.order_id }}
+                  </button>
 
-                <div id="order-{{ d.order_id }}" class="hidden ml-4 mt-1 text-sm text-gray-700">
-                  <p><strong>Adres:</strong> {{ d.order.delivery_address }}</p>
-                  <p><strong>Telefoon:</strong> {{ d.order.delivery_phone }}</p>
-                  <p><strong>Gewicht:</strong> {{ d.order.total_weight_kg }} kg</p>
+                  <!-- STATUS BADGE -->
+                  <span class="ml-2 px-2 py-1 rounded-full text-xs
+                    {% if d.delivery_status == 'delivered' %}
+                      bg-green-100 text-green-700
+                    {% elif d.delivery_status == 'not_delivered' %}
+                      bg-red-100 text-red-700
+                    {% else %}
+                      bg-yellow-100 text-yellow-700
+                    {% endif %}">
+                    {{ d.delivery_status or "planned" }}
+                  </span>
 
-                  <p><strong>Flessen:</strong> {{ d.order.qty_fles or 0 }}</p>
-                  <p><strong>Vaten:</strong> {{ d.order.qty_vat or 0 }}</p>
-                  <p><strong>BIBs:</strong> {{ d.order.qty_bib or 0 }}</p>
+                  <!-- DETAILS -->
+                  <div id="order-{{ r.route_id }}-{{ d.order_id }}"
+                       class="hidden ml-4 mt-2 text-sm text-gray-700 space-y-1">
 
-                  <p><strong>Status levering:</strong> {{ d.delivery_status }}</p>
-                  <p><strong>Volgorde:</strong> {{ d.sequence }}</p>
+                    <p><strong>Adres:</strong> {{ d.order.delivery_address }}</p>
+                    <p><strong>Telefoon:</strong> {{ d.order.delivery_phone }}</p>
+                    <p><strong>Gewicht:</strong> {{ d.order.total_weight_kg }} kg</p>
 
-                  {% if d.delivery_comment %}
-                    <p class="font-semibold text-red-700">
-                      <strong>Commentaar driver:</strong>
-                      <span class="text-red-600">{{ d.delivery_comment }}</span>
+                    <p><strong>Flessen:</strong> {{ d.order.qty_fles or 0 }}</p>
+                    <p><strong>Vaten:</strong> {{ d.order.qty_vat or 0 }}</p>
+                    <p><strong>BIBs:</strong> {{ d.order.qty_bib or 0 }}</p>
+
+                    <p>
+                      <strong>Status levering:</strong>
+                      {% if d.delivery_status == 'delivered' %}
+                        <span class="px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs">delivered</span>
+                      {% elif d.delivery_status == 'not_delivered' %}
+                        <span class="px-2 py-1 rounded-full bg-red-100 text-red-700 text-xs">not delivered</span>
+                      {% else %}
+                        <span class="px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs">planned</span>
+                      {% endif %}
                     </p>
-                  {% endif %}
+
+                    <p><strong>Volgorde:</strong> {{ d.sequence }}</p>
+
+                    {% if d.delivery_comment %}
+                      <p class="font-semibold text-red-700">
+                        <strong>Commentaar driver:</strong>
+                        <span class="text-red-600">{{ d.delivery_comment }}</span>
+                      </p>
+                    {% endif %}
+
+                  </div>
                 </div>
+
+                <!-- RECHTERDEEL: UIT ROUTE HALEN -->
+                <form method="post"
+                      action="{{ url_for('admin.remove_order_from_route',
+                                         route_id=r.route_id,
+                                         order_id=d.order_id) }}">
+                  {% if csrf_token is defined %}
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  {% endif %}
+                  <button type="submit"
+                          class="px-3 py-1 rounded-md bg-red-100 text-red-700 text-xs hover:bg-red-200">
+                    Uit route halen
+                  </button>
+                </form>
+
               </div>
-
-              <!-- RECHTERDEEL: UIT ROUTE HALEN -->
-              <form method="post"
-                    action="{{ url_for('admin.remove_order_from_route',
-                                       route_id=r.route_id,
-                                       order_id=d.order_id) }}">
-                {% if csrf_token is defined %}
-                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                {% endif %}
-                <button type="submit"
-                        class="px-3 py-1 rounded-md bg-red-100 text-red-700 text-xs hover:bg-red-200">
-                  Uit route halen
-                </button>
-              </form>
-
-            </div>
             {% endfor %}
           {% else %}
             <p class="text-gray-400 text-sm">Geen bestellingen.</p>
@@ -249,10 +316,10 @@
         </div>
       </div>
 
-      {% endfor %}
-    {% else %}
-      <p class="text-center text-gray-400 py-10">Geen routes.</p>
-    {% endif %}
+    {% endfor %}
+  {% else %}
+    <p class="text-center text-gray-400 py-10">Geen routes.</p>
+  {% endif %}
 
 </section>
 
