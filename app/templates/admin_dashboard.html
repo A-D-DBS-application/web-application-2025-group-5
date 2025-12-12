@@ -6,7 +6,7 @@
 
 <!-- HEADER -->
 <div class="flex items-center justify-between mb-6 max-md:flex-col max-md:items-start max-md:gap-4">
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-3 max-md:flex-col max-md:w-full">
         <div class="bg-blue-600 text-white w-12 h-12 rounded-xl flex items-center justify-center shadow">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none"
                  viewBox="0 0 24 24" stroke="currentColor">
@@ -21,7 +21,7 @@
         </div>
     </div>
 
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-3 max-md:flex-col max-md:w-full">
         
         {% if current_user.has_role('driver') %}
         <a href="{{ url_for('driver.dashboard') }}"
@@ -40,25 +40,25 @@
 </div>
 
 <!-- STATS -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
     <div class="bg-white rounded-2xl border border-slate-200 p-4">
         <p class="text-sm text-slate-500 mb-1">Totaal bestellingen</p>
-        <p class="text-3xl font-semibold text-slate-900">{{ total_orders }}</p>
+        <p class="text-3xl font-semibold text-slate-900 max-md:text-2xl">{{ total_orders }}</p>
     </div>
 
     <div class="bg-white rounded-2xl border border-slate-200 p-4">
         <p class="text-sm text-slate-500 mb-1">Pending</p>
-        <p class="text-3xl font-semibold text-slate-900">{{ pending_orders }}</p>
+        <p class="text-3xl font-semibold text-slate-900 max-md:text-2xl">{{ pending_orders }}</p>
     </div>
 
     <div class="bg-white rounded-2xl border border-slate-200 p-4">
         <p class="text-sm text-slate-500 mb-1">Actieve routes</p>
-        <p class="text-3xl font-semibold text-slate-900">{{ active_routes }}</p>
+        <p class="text-3xl font-semibold text-slate-900 max-md:text-2xl">{{ active_routes }}</p>
     </div>
 
     <div class="bg-white rounded-2xl border border-slate-200 p-4">
         <p class="text-sm text-slate-500 mb-1">Drivers</p>
-        <p class="text-3xl font-semibold text-slate-900">{{ drivers|length }}</p>
+        <p class="text-3xl font-semibold text-slate-900 max-md:text-2xl">{{ drivers|length }}</p>
     </div>
 </div>
 
@@ -74,21 +74,21 @@
 
 <!-- TAB HEADERS -->
 <div class="border-b border-slate-200 px-4 pt-3">
-    <div class="flex gap-4 overflow-x-auto">
+    <div class="flex gap-4 overflow-x-auto pb-1">
 
-        <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-blue-700 bg-blue-50"
+        <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-blue-700 bg-blue-50 whitespace-nowrap"
                 data-tab="routes">Routes</button>
 
-        <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-slate-600"
+        <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-slate-600 whitespace-nowrap"
                 data-tab="orders">Bestellingen</button>
 
-        <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-slate-600"
+        <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-slate-600 whitespace-nowrap"
                 data-tab="users">Users</button>
 
-        <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-slate-600"
+        <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-slate-600 whitespace-nowrap"
                 data-tab="drivers">Drivers</button>
 
-        <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-slate-600"
+        <button class="tab-btn py-2 px-3 rounded-t-lg text-sm font-medium text-slate-600 whitespace-nowrap"
                 data-tab="vehicles">Voertuigen</button>
     </div>
 </div>
@@ -341,7 +341,7 @@
                placeholder="Zoek op klant, telefoon, adres, gewicht..."
                value="{{ request.args.get('q', '') }}"
                class="px-3 py-2 rounded-lg border border-slate-300 text-sm w-64 
-                      focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      focus:outline-none focus:ring-2 focus:ring-blue-500 max-md:hidden">
       </form>
 
       <a href="{{ url_for('admin.create_order') }}"
@@ -357,7 +357,7 @@
 <div class="space-y-3">
 
   {% for o in orders %}
-  <div class="border border-slate-200 rounded-xl p-4 flex justify-between flex-wrap gap-4 max-md:flex-col">
+  <div class="border border-slate-200 rounded-xl p-4 flex justify-between flex-wrap gap-4 max-md:items-start">
 
     <!-- LEFT -->
     <div class="space-y-1">
@@ -508,11 +508,11 @@
       </div>
 
       <!-- Buttons -->
-      <div class="flex flex-col items-end gap-2 w-40">
+      <div class="flex flex-col items-end gap-2 w-40 max-md:w-full">
 
         <!-- Edit -->
         <a href="{{ url_for('admin.edit_user', user_id=u.user_id) }}"
-           class="px-3 py-2 rounded-lg bg-blue-600 text-white text-xs text-center hover:bg-blue-700">
+           class="px-3 py-2 rounded-lg bg-blue-600 text-white text-xs text-center hover:bg-blue-700 max-md:hidden">
           Bewerken
         </a>
 
@@ -522,7 +522,7 @@
           <button type="submit"
               class="px-3 py-2 rounded-lg text-xs w-full
                      {{ 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' if u.is_active 
-                        else 'bg-green-100 text-green-700 hover:bg-green-200' }}">
+                        else 'bg-green-100 text-green-700 hover:bg-green-200' }} max-md:hidden">
             {{ "Deactiveer" if u.is_active else "Activeer" }}
           </button>
         </form>
@@ -533,12 +533,44 @@
               action="{{ url_for('admin.delete_user', user_id=u.user_id) }}"
               onsubmit="return confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?');">
           <button type="submit"
-                  class="px-3 py-2 rounded-lg bg-red-600 text-white text-xs w-full hover:bg-red-700">
+                  class="px-3 py-2 rounded-lg bg-red-600 text-white text-xs w-full hover:bg-red-700 max-md:hidden">
             Verwijderen
           </button>
         </form>
         {% endif %}
+       <!-- MOBILE -->
+        <button
+          onclick="toggleDetails('user-actions-{{ u.user_id }}')"
+          class="hidden max-md:block w-full px-4 py-2 rounded-lg bg-slate-200 text-slate-800 text-sm">
+          Acties
+        </button>
+        <div id="user-actions-{{ u.user_id }}"
+             class="hidden mt-2 w-full rounded-lg border bg-white shadow-sm">
+          
+          <a href="{{ url_for('admin.edit_user', user_id=u.user_id) }}"
+             class="block px-4 py-2 text-sm hover:bg-gray-100">
+            Bewerken
+          </a>
 
+          <form method="POST"
+                action="{{ url_for('admin.toggle_user_active', user_id=u.user_id) }}">
+            <button type="submit"
+                    class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+              {{ "Deactiveer" if u.is_active else "Activeer" }}
+            </button>
+          </form>
+
+          {% if current_user.user_id != u.user_id %}
+          <form method="POST"
+                action="{{ url_for('admin.delete_user', user_id=u.user_id) }}">
+            <button type="submit"
+                    class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+              Verwijderen
+            </button>
+          </form>
+          {% endif %}
+
+        </div>
       </div>
 
     </div>
