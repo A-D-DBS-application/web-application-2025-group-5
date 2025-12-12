@@ -5,7 +5,7 @@
 <div class="min-h-screen bg-slate-50 px-6 py-6">
 
 <!-- HEADER -->
-<div class="flex items-center justify-between mb-6">
+<div class="flex items-center justify-between mb-6 max-md:flex-col max-md:items-start max-md:gap-4">
     <div class="flex items-center gap-3">
         <div class="bg-blue-600 text-white w-12 h-12 rounded-xl flex items-center justify-center shadow">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none"
@@ -26,19 +26,18 @@
         {% if current_user.has_role('driver') %}
         <a href="{{ url_for('driver.dashboard') }}"
            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-600 
-                  bg-blue-50 text-blue-700 text-sm hover:bg-blue-100">
+                  bg-blue-50 text-blue-700 text-sm hover:bg-blue-100 max-md:w-full justify-center">
             Naar Driver Dashboard
         </a>
         {% endif %}
 
         <a href="{{ url_for('auth.logout') }}"
            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 
-                  bg-white text-slate-700 text-sm hover:bg-slate-100">
+                  bg-white text-slate-700 text-sm hover:bg-slate-100 max-md:w-full justify-center">
           Uitloggen
         </a>
     </div>
 </div>
-
 
 <!-- STATS -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -97,7 +96,6 @@
 <!-- TAB CONTENT -->
 <div class="p-6 space-y-6">
 
-
 <!-- ========================================================= -->
 <!--  ROUTES TAB                                              -->
 <!-- ========================================================= -->
@@ -118,7 +116,7 @@
   <!-- FILTER -->
   <form method="get"
         action="{{ url_for('admin.dashboard') }}"
-        class="mb-6 flex items-end gap-3 flex-wrap">
+        class="mb-6 flex items-end gap-3 flex-wrap max-md:flex-col max-md:items-start">
 
     <div>
       <label class="text-sm font-medium text-slate-600 mb-1 block">
@@ -130,13 +128,13 @@
              class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
     </div>
 
-    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
+    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 max-md:w-full">
       Filter
     </button>
 
     {% if selected_route_date %}
       <a href="{{ url_for('admin.dashboard') }}"
-         class="px-4 py-2 rounded-lg text-sm bg-gray-200 text-gray-700 hover:bg-gray-300">
+         class="px-4 py-2 rounded-lg text-sm bg-gray-200 text-gray-700 hover:bg-gray-300 max-md:w-full">
         Reset
       </a>
     {% endif %}
@@ -159,7 +157,7 @@
       <div class="bg-white border border-gray-200 rounded-xl p-4 mb-3 shadow-sm">
 
         <!-- ROUTE HEADER -->
-        <div class="flex justify-between items-start gap-6">
+        <div class="flex justify-between items-start gap-6 max-md:flex-col">
           <div class="flex-1">
             <p class="font-semibold text-gray-900">
               {{ r.route_date.strftime('%d/%m/%Y') }} – {{ r.driver.name }}
@@ -198,7 +196,7 @@
                 <p class="text-sm font-semibold text-red-700 mb-1">
                   ⚠ Niet geleverd:
                 </p>
-                <div class="flex flex-wrap gap-2">
+                <div class="flex flex-wrap gap-2 max-md:w-full">
                   {% for d in problem_orders %}
                     <span class="px-2 py-1 rounded-full bg-red-100 text-red-700 text-xs">
                       Order #{{ d.order_id }}
@@ -210,16 +208,16 @@
           </div>
 
           <!-- ROUTE ACTIES -->
-          <div class="flex gap-2 flex-wrap">
+          <div class="flex gap-2 flex-wrap max-md:w-full">
             <a href="{{ url_for('admin.assign_orders', route_id=r.route_id) }}"
-               class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
+               class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm max-md:w-full text-center">
               Bestellingen toewijzen
             </a>
 
             <form method="post"
                   action="{{ url_for('admin.delete_route', route_id=r.route_id) }}"
                   onsubmit="return confirm('Ben je zeker dat je deze route wil verwijderen?');">
-              <button class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm">
+              <button class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm max-md:w-full text-center">
                 Route verwijderen
               </button>
             </form>
@@ -323,7 +321,6 @@
 
 </section>
 
-
 <!-- ========================================================= -->
 <!-- ORDERS TAB -->
 <!-- ========================================================= -->
@@ -360,7 +357,7 @@
 <div class="space-y-3">
 
   {% for o in orders %}
-  <div class="border border-slate-200 rounded-xl p-4 flex justify-between flex-wrap gap-4">
+  <div class="border border-slate-200 rounded-xl p-4 flex justify-between flex-wrap gap-4 max-md:flex-col">
 
     <!-- LEFT -->
     <div class="space-y-1">
@@ -393,7 +390,7 @@
   </div>
 
     <!-- RIGHT -->
-    <div class="flex flex-col items-end gap-4">
+    <div class="flex flex-col items-end gap-4 max-md:items-start max-md:w-full">
 
       <!-- STATUS BADGES -->
       <div class="flex flex-col gap-2 text-xs">
@@ -425,10 +422,10 @@
       </div>
 
       <!-- ACTIE KNOPPEN -->
-      <div class="flex flex-col gap-2 w-36">
+      <div class="flex flex-col gap-2 w-36 max-md:w-full">
 
         <a href="{{ url_for('admin.edit_order', order_id=o.order_id) }}"
-          class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm text-center hover:bg-blue-700">
+          class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm text-center hover:bg-blue-700 max-md:w-full">
           Bewerken
         </a>
 
@@ -437,7 +434,7 @@
               onsubmit="return confirm('Weet je zeker dat je deze order wilt verwijderen?');">
 
           <button type="submit"
-                  class="px-4 py-2 w-full rounded-lg bg-red-600 text-white text-sm hover:bg-red-700">
+                  class="px-4 py-2 w-full rounded-lg bg-red-600 text-white text-sm hover:bg-red-700 max-md:w-full">
             Verwijderen
           </button>
         </form>
@@ -455,14 +452,13 @@
 {% endif %}
 </section>
 
-
 <!-- ========================================================= -->
 <!-- USERS TAB (GEOPTIMALISEERD) -->
 <!-- ========================================================= -->
 <section id="tab-users" class="tab-pane hidden">
 
   <!-- Header -->
-  <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+  <div class="flex items-center justify-between mb-4 flex-wrap gap-3 max-md:flex-col max-md:items-start">
     <div>
       <h2 class="text-lg font-semibold text-slate-900">Users</h2>
       <p class="text-sm text-slate-500">Beheer alle gebruikers & rollen</p>
@@ -478,7 +474,7 @@
   <div class="space-y-3">
 
     {% for u in users %}
-    <div class="border border-slate-200 rounded-xl p-4 flex justify-between flex-wrap gap-4">
+    <div class="border border-slate-200 rounded-xl p-4 flex justify-between flex-wrap gap-4 max-md:flex-col max-md:items-start">
 
       <!-- User Info -->
       <div class="space-y-1">
@@ -555,7 +551,6 @@
 
 </section>
 
-
 <!-- ========================================================= -->
 <!-- DRIVERS TAB -->
 <!-- ========================================================= -->
@@ -568,7 +563,7 @@
     {% if drivers %}
     <div class="space-y-3">
       {% for d in drivers %}
-      <div class="border border-slate-200 rounded-xl p-4 flex justify-between flex-wrap gap-4">
+      <div class="border border-slate-200 rounded-xl p-4 flex justify-between flex-wrap gap-4 max-md:flex-col max-md:items-start">
         <div>
           <p class="font-semibold text-slate-900">{{ d.name }}</p>
           <p class="text-sm text-slate-500">{{ d.email }}</p>
@@ -599,7 +594,6 @@
     {% endif %}
 </section>
 
-
 <!-- ========================================================= -->
 <!-- VEHICLES TAB -->
 <!-- ========================================================= -->
@@ -620,7 +614,7 @@
     <div class="space-y-3">
 
         {% for v in vehicles %}
-        <div class="border border-slate-200 rounded-xl p-4 flex justify-between items-center">
+        <div class="border border-slate-200 rounded-xl p-4 flex justify-between items-center max-md:flex-col max-md:items-start">
 
             <!-- Linkerkant: voertuiginfo -->
             <div class="space-y-1">
@@ -632,7 +626,7 @@
             </div>
 
             <!-- Rechterkant: actieknoppen -->
-            <div class="flex flex-col items-end gap-2">
+            <div class="flex flex-col items-end gap-2 max-md:items-start max-md:w-full">
 
                 <!-- STATUS TOGGLE BUTTON -->
                 <form method="POST"
@@ -730,3 +724,6 @@ if (orderSearchInput) {
 </script>
 
 {% endblock %}
+
+
+

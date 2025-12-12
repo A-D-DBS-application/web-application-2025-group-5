@@ -1,0 +1,14 @@
+/* ALGEMENE RESPONSIVE HULP */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .mobile-stack {
+    flex-direction: column;
+  }
+
+  .mobile-full {
+    width: 100%;
+  }
+}

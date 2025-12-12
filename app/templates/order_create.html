@@ -19,77 +19,108 @@
       <!-- KLANT ZOEKFUNCTIE -->
       <label class="block text-sm font-medium text-gray-700 mb-1">Klant *</label>
 
-      <!-- Zoekveld -->
       <div class="relative mb-5">
         <input type="text" id="customer_search"
                placeholder="Zoek klant..."
                class="w-full border border-gray-300 rounded-lg px-3 py-2"
                autocomplete="off">
 
-        <!-- Zoekresultaten -->
         <div id="customer_results"
              class="absolute left-0 right-0 bg-white border border-gray-300 rounded-lg mt-1 hidden z-20 max-h-60 overflow-y-auto">
         </div>
       </div>
 
-      <!-- Hidden echte customer_id -->
       <input type="hidden" name="customer_id" id="customer_id" required />
 
-      <!-- Adres -->
+      <!-- ADRES -->
       <label class="block text-sm font-medium text-gray-700 mb-1">Bezorgadres *</label>
       <input type="text" id="delivery_address" name="delivery_address" required
              class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5" />
 
-      <!-- Telefoon -->
+      <!-- TELEFOON -->
       <label class="block text-sm font-medium text-gray-700 mb-1">Telefoon *</label>
       <input type="text" id="delivery_phone" name="delivery_phone" required
              class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5" />
 
-      <!-- startdatum leveren -->
-      <label class="block text-sm font-medium text-gray-700 mb-1">Eerste mogelijke leverdatum *</label>
-      <input type="date" name="delivery_window_start" required
-            value="{{default_date}}"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5" />
+      <!-- DATUMS (desktop = 2 kolommen, gsm = 1) -->
+      <div class="grid grid-cols-2 max-md:grid-cols-1 gap-4 mb-5">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Eerste mogelijke leverdatum *
+          </label>
+          <input type="date" name="delivery_window_start" required
+                 value="{{ default_date }}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2" />
+        </div>
 
-      <!-- uiterste leverdatum -->
-      <label class="block text-sm font-medium text-gray-700 mb-1">Uiterste leverdatum *</label>
-      <input type="date" name="delivery_window_end" required
-             class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5" />
-      <!-- Levering vanaf (uur) -->
-      <label class="block text-sm font-medium text-gray-700 mb-1">Levering vanaf (uur)</label>
-      <input type="time" name="delivery_hour_start"
-             value="08:00"
-             class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5" />
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Uiterste leverdatum *
+          </label>
+          <input type="date" name="delivery_window_end" required
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2" />
+        </div>
+      </div>
 
-      <!-- Levering tot (uur) -->
-      <label class="block text-sm font-medium text-gray-700 mb-1">Levering tot (uur)</label>
-      <input type="time" name="delivery_hour_end"
-             value="17:00"
-             class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5" />
+      <!-- UREN (desktop = 2 kolommen, gsm = 1) -->
+      <div class="grid grid-cols-2 max-md:grid-cols-1 gap-4 mb-5">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Levering vanaf (uur)
+          </label>
+          <input type="time" name="delivery_hour_start" value="08:00"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2" />
+        </div>
 
-      <!-- PRODUCTEN / GEWICHT -->
-      <label class="block text-sm font-medium text-gray-700 mb-1">Aantal vaten (60L – 65 kg)</label>
-      <input type="number" name="qty_vat" min="0"
-             class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5" />
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Levering tot (uur)
+          </label>
+          <input type="time" name="delivery_hour_end" value="17:00"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2" />
+        </div>
+      </div>
 
-      <label class="block text-sm font-medium text-gray-700 mb-1">Aantal flessen (75cl – 1,5 kg)</label>
-      <input type="number" name="qty_fles" min="0"
-             class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5" />
+      <!-- PRODUCTEN (desktop = 3 kolommen, gsm = 1) -->
+      <div class="grid grid-cols-3 max-md:grid-cols-1 gap-4 mb-5">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Aantal vaten (60L – 65 kg)
+          </label>
+          <input type="number" name="qty_vat" min="0"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2" />
+        </div>
 
-      <label class="block text-sm font-medium text-gray-700 mb-1">Aantal BIBs (3L – 4 kg)</label>
-      <input type="number" name="qty_bib" min="0"
-             class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5" />
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Aantal flessen (75cl – 1,5 kg)
+          </label>
+          <input type="number" name="qty_fles" min="0"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2" />
+        </div>
 
-      <!-- Automatische berekening, readonly -->
-      <label class="block text-sm font-medium text-gray-700 mb-1">Automatisch Gewicht (kg)</label>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Aantal BIBs (3L – 4 kg)
+          </label>
+          <input type="number" name="qty_bib" min="0"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2" />
+        </div>
+      </div>
+
+      <!-- AUTOMATISCH GEWICHT -->
+      <label class="block text-sm font-medium text-gray-700 mb-1">
+        Automatisch Gewicht (kg)
+      </label>
       <input type="number" id="auto_weight" readonly
              class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 mb-5" />
 
-      <!-- Order Status -->
+      <!-- STATUSSEN -->
       <input type="hidden" name="order_status" value="confirmed">
 
-      <!-- Payment Status -->
-      <label class="block text-sm font-medium text-gray-700 mb-1">Betaal Status</label>
+      <label class="block text-sm font-medium text-gray-700 mb-1">
+        Betaal Status
+      </label>
       <select name="payment_status"
               class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-5">
         <option value="pending">Pending</option>
@@ -103,15 +134,13 @@
 
     </form>
 
-    <!--  klantzoeker + gewichtberekening -->
+    <!-- JS ongewijzigd -->
     <script>
-      // --- Klantzoeker ---
       const searchInput = document.getElementById("customer_search");
       const resultsBox = document.getElementById("customer_results");
 
       searchInput.addEventListener("input", async () => {
         const q = searchInput.value.trim();
-
         if (q.length < 2) {
           resultsBox.classList.add("hidden");
           return;
@@ -130,45 +159,33 @@
 
         customers.forEach(c => {
           const item = document.createElement("div");
-          item.className =
-            "p-2 hover:bg-gray-100 cursor-pointer border-b border-gray-200";
+          item.className = "p-2 hover:bg-gray-100 cursor-pointer border-b";
           item.textContent = `${c.name} – ${c.address}`;
 
-          item.addEventListener("click", () => {
-            document.getElementById("customer_id").value = c.id;
-            document.getElementById("delivery_address").value = c.address;
-            document.getElementById("delivery_phone").value = c.phone;
-
+          item.onclick = () => {
+            customer_id.value = c.id;
+            delivery_address.value = c.address;
+            delivery_phone.value = c.phone;
             searchInput.value = c.name;
             resultsBox.classList.add("hidden");
-          });
+          };
 
           resultsBox.appendChild(item);
         });
       });
 
-      document.addEventListener("click", (event) => {
-        if (!resultsBox.contains(event.target) && event.target !== searchInput) {
-          resultsBox.classList.add("hidden");
-        }
-      });
-
-      // --- Automatische gewichtsberekening ---
       function updateWeight() {
-          const vat = parseInt(document.querySelector('[name="qty_vat"]').value || 0);
-          const fles = parseInt(document.querySelector('[name="qty_fles"]').value || 0);
-          const bib = parseInt(document.querySelector('[name="qty_bib"]').value || 0);
-
-          const totaal = vat * 65 + fles * 1.5 + bib * 4;
-          document.getElementById('auto_weight').value = totaal.toFixed(2);
+        const vat = parseInt(document.querySelector('[name="qty_vat"]').value || 0);
+        const fles = parseInt(document.querySelector('[name="qty_fles"]').value || 0);
+        const bib = parseInt(document.querySelector('[name="qty_bib"]').value || 0);
+        auto_weight.value = (vat * 65 + fles * 1.5 + bib * 4).toFixed(2);
       }
 
-      ['qty_vat','qty_fles','qty_bib'].forEach(id => {
-          document.querySelector(`[name="${id}"]`).addEventListener('input', updateWeight);
-      });
+      ['qty_vat','qty_fles','qty_bib'].forEach(n =>
+        document.querySelector(`[name="${n}"]`).addEventListener('input', updateWeight)
+      );
     </script>
 
   </div>
 </div>
 {% endblock %}
-
