@@ -129,7 +129,7 @@ def update_delivery_status(delivery_id):
     action = request.form.get("action")
     comment = (request.form.get("delivery_comment") or "").strip()
 
-    # ❌ Niet geleverd → comment verplicht
+    # Niet geleverd → comment verplicht
     if action == "not_delivered" and not comment:
         flash("Geef een reden op waarom deze levering niet kon gebeuren.", "error")
         return redirect(request.referrer or url_for("driver.dashboard"))
