@@ -18,7 +18,19 @@ def require_admin():
         flash("Je hebt geen toegang tot dit gedeelte.", "error")
         return False
     return True
+# -------------------------------------------
+#  hulpfunctie voor filteren status van route
+# -------------------------------------------
+def update_route_status_if_completed(route_id):
+    route = Route.query.get(route_id)
+    if not route:
+        return
 
+    deliveries = RouteDelivery.query.filter_by(route_id=route_id).all()
+
+    if deliveries and all(d.delivery_status == "delivered" for d in deliveries):
+        route.route_status = "completed"
+        db.session.commit()
 
 # -------------------------------------------
 #  DASHBOARD
@@ -31,84 +43,116 @@ def dashboard():
 
     today = date.today()
 
+    # ---------------- ROUTE FILTER ----------------
     selected_route_date = request.args.get("route_date")
-    routes_query = Route.query.order_by(Route.route_date.desc())
-
     date_obj = None
+
     if selected_route_date:
         try:
             date_obj = datetime.strptime(selected_route_date, "%Y-%m-%d").date()
-            routes_query = routes_query.filter(Route.route_date == date_obj)
         except ValueError:
             pass
 
-    routes = routes_query.all()
+    # ---------------- ACTIEVE ROUTES (MET DATUMFILTER) ----------------
+    active_routes_query = Route.query.filter(
+        Route.route_status != "completed"
+    ).order_by(Route.route_date.desc())
 
-    # ✓ Drivers (personen met rol 'driver')
-    drivers = User.query.filter(User.roles.contains("driver"), User.is_active == True).all()
+    if date_obj:
+        active_routes_query = active_routes_query.filter(
+            Route.route_date == date_obj
+        )
+
+    active_routes_list = active_routes_query.all()
+
+    # ---------------- VOLTOOIDE ROUTES (GEEN DATUMFILTER) ----------------
+    completed_routes = (
+        Route.query
+        .filter(Route.route_status == "completed")
+        .order_by(Route.route_date.desc())
+        .all()
+    )
+
+    active_routes_count = len(active_routes_list)
+
+
+    # ---------------- USERS / DRIVERS / VEHICLES ----------------
+    drivers = User.query.filter(
+        User.roles.contains("driver"),
+        User.is_active == True
+    ).all()
 
     vehicles = Vehicle.query.order_by(Vehicle.license_plate.asc()).all()
-
-    # Alle users ophalen voor USERS-tab
     users = User.query.order_by(User.name.asc()).all()
 
+    # ---------------- ACTIEVE ORDERS ----------------
+    q_active = (request.args.get("q_active") or "").strip()
 
-    # -------------- ORDER SEARCH --------------
-    search_raw = request.args.get("q")
-    search = (search_raw or "").strip()
+    active_orders_query = (
+        PurchaseOrders.query
+        .join(Customer)
+        .filter(PurchaseOrders.order_status != "delivered")
+    )
 
-    if search_raw is not None and search == "":
-        return redirect(url_for("admin.dashboard"))
-
-    if search:
-        pattern = f"%{search}%"
-        filters = [
-            PurchaseOrders.delivery_address.ilike(pattern),
-            PurchaseOrders.delivery_phone.ilike(pattern),
-            PurchaseOrders.order_status.ilike(pattern),
-            PurchaseOrders.payment_status.ilike(pattern),
-            Customer.first_name.ilike(pattern),
-            Customer.last_name.ilike(pattern),
-            Customer.customer.ilike(pattern),
-            Customer.street_number.ilike(pattern),
-        ]
-
-        if search.isdigit():
-            num = int(search)
-            filters += [
-                PurchaseOrders.order_id == num,
-                PurchaseOrders.total_weight_kg == num,
-            ]
-        else:
-            filters.append(PurchaseOrders.order_id.cast(db.Text).ilike(pattern))
-
-        orders = (
-            PurchaseOrders.query
-            .join(Customer)
-            .filter(or_(*filters))
-            .order_by(PurchaseOrders.created_at.desc())
-            .all()
+    if q_active:
+        pattern = f"%{q_active}%"
+        active_orders_query = active_orders_query.filter(
+            or_(
+                Customer.customer.ilike(pattern),
+                Customer.first_name.ilike(pattern),
+                Customer.last_name.ilike(pattern),
+                Customer.street_number.ilike(pattern),
+                PurchaseOrders.delivery_phone.ilike(pattern),
+            )
         )
-    else:
-        orders = PurchaseOrders.query.order_by(PurchaseOrders.order_id.desc()).all()
 
-    all_users = User.query.order_by(User.created_at.desc()).all()
+    open_orders = active_orders_query.order_by(
+        PurchaseOrders.created_at.desc()
+    ).all()
+
+    open_orders_count = len(open_orders)
+
+    # ---------------- GELEVERDE ORDERS ----------------
+    q_delivered = (request.args.get("q_delivered") or "").strip()
+
+    delivered_orders_query = (
+        PurchaseOrders.query
+        .join(Customer)
+        .filter(PurchaseOrders.order_status == "delivered")
+    )
+
+    if q_delivered:
+        pattern = f"%{q_delivered}%"
+        delivered_orders_query = delivered_orders_query.filter(
+            or_(
+                Customer.customer.ilike(pattern),
+                Customer.first_name.ilike(pattern),
+                Customer.last_name.ilike(pattern),
+                Customer.street_number.ilike(pattern),
+                PurchaseOrders.delivery_phone.ilike(pattern),
+            )
+        )
+
+    delivered_orders = delivered_orders_query.order_by(
+        PurchaseOrders.created_at.desc()
+    ).all()
 
     return render_template(
         "admin_dashboard.html",
         today=today,
-        routes=routes,
+        routes=active_routes_list,
+        completed_routes=completed_routes,
         drivers=drivers,
         vehicles=vehicles,
         users=users,
-        orders=orders,
+        open_orders=open_orders,
+        delivered_orders=delivered_orders,
+        open_orders_count=open_orders_count,
         total_orders=PurchaseOrders.query.count(),
         pending_orders=PurchaseOrders.query.filter_by(order_status="pending").count(),
-        active_routes=Route.query.filter(Route.route_status != "completed").count(),
+        active_routes=active_routes_count,
         selected_route_date=date_obj,
-        all_users=all_users,
     )
-
 
 # -------------------------------------------
 #  ROUTE AANMAKEN

@@ -3,6 +3,8 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from .models import Route, RouteDelivery, User
 from . import db
+from app.admin_routes import update_route_status_if_completed
+
 
 driver_bp = Blueprint("driver", __name__, url_prefix="/driver")
 
@@ -142,6 +144,7 @@ def update_delivery_status(delivery_id):
 
     delivery.delivery_comment = comment
     db.session.commit()
+    update_route_status_if_completed(delivery.route_id)
 
     flash("Leveringsstatus bijgewerkt.", "success")
     return redirect(request.referrer or url_for("driver.dashboard"))
