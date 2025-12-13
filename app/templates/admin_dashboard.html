@@ -855,16 +855,6 @@
                     Bewerken
                 </a>
 
-                <!-- VERWIJDEREN -->
-                <form method="POST"
-                      action="{{ url_for('admin.delete_vehicle', vehicle_id=v.vehicle_id) }}"
-                      onsubmit="return confirm('Weet je zeker dat je dit voertuig wilt verwijderen?');">
-                    <button type="submit"
-                            class="px-3 py-1 text-xs rounded-md bg-red-600 text-white hover:bg-red-700">
-                        Verwijderen
-                    </button>
-                </form>
-
             </div>
 
         </div>
