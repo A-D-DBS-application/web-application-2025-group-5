@@ -265,33 +265,80 @@ def assign_orders(route_id):
 
     route = Route.query.get_or_404(route_id)
 
-    # POST ------------------------------
-    if request.method == "POST":
+    # ------------------------------------------
+    # ACTIEVE WAGENS LADEN
+    # ------------------------------------------
+    vehicles = Vehicle.query.filter_by(is_active=True).all()
+
+    # ------------------------------------------
+    # REEDS TOEGEWEZEN ORDERS (VOOR INFO & GEWICHT)
+    # ------------------------------------------
+    assigned_orders = (
+        PurchaseOrders.query
+        .join(RouteDelivery, PurchaseOrders.order_id == RouteDelivery.order_id)
+        .filter(RouteDelivery.route_id == route.route_id)
+        .all()
+    )
+
+    # ------------------------------------------
+    # ROUTE VERGRENDELEN ALS ER AL GELEVERDE ORDERS ZIJN
+    # (not_delivered mag WEL opnieuw in een andere route)
+    # ------------------------------------------
+    route_locked = any(
+        d.delivery_status == "delivered"
+        for d in route.deliveries
+    )
+
+    # ------------------------------------------
+    # POST — WAGEN WISSELEN
+    # (klein formpje met alleen vehicle_id)
+    # ------------------------------------------
+    if request.method == "POST" and "vehicle_id" in request.form and "order_ids" not in request.form:
+        if route_locked:
+            flash("Route is vergrendeld: wagen kan niet meer gewijzigd worden.", "error")
+            return redirect(url_for("admin.assign_orders", route_id=route_id))
+
+        new_vehicle = Vehicle.query.get(request.form.get("vehicle_id"))
+        if new_vehicle:
+            route.vehicle_id = new_vehicle.vehicle_id
+            db.session.commit()
+            flash("Wagen gewijzigd.", "success")
+        else:
+            flash("Wagen niet gevonden.", "error")
+
+        return redirect(url_for("admin.assign_orders", route_id=route_id))
+
+    # ------------------------------------------
+    # POST — ORDERS TOEWIJZEN & OPTIMALISEREN
+    # ------------------------------------------
+    if request.method == "POST" and "order_ids" in request.form:
+        if route_locked:
+            flash("Route is vergrendeld: er zijn al geleverde orders. Geen nieuwe bestellingen mogelijk.", "error")
+            return redirect(url_for("admin.assign_orders", route_id=route_id))
+
         order_ids = request.form.getlist("order_ids")
 
         if not order_ids:
             flash("Selecteer minstens één bestelling.", "error")
             return redirect(url_for("admin.assign_orders", route_id=route_id))
 
-        # Nieuwe orders (die je net hebt aangevinkt in het formulier)
+        # Nieuwe orders (uit formulier)
         new_orders = [PurchaseOrders.query.get(int(oid)) for oid in order_ids]
 
-        # Bestaande orders die al in deze route zitten (uit de database)
+        # Bestaande orders in deze route
         existing_links = RouteDelivery.query.filter_by(route_id=route.route_id).all()
-        existing_orders = [link.order for link in existing_links]
+        existing_orders = [l.order for l in existing_links]
 
-        # Dubbels vermijden: als een order al in de route zat, niet nog eens als "nieuw" toevoegen
         existing_ids = {o.order_id for o in existing_orders}
         really_new_orders = [o for o in new_orders if o and o.order_id not in existing_ids]
 
-        # Alle orders samen: oude + echt nieuwe
         all_orders = existing_orders + really_new_orders
 
         if not all_orders:
-            flash("Er zijn geen orders om in deze route op te nemen.", "error")
+            flash("Geen orders om toe te voegen.", "error")
             return redirect(url_for("admin.assign_orders", route_id=route_id))
 
-        # --- GEOCODING ---
+        # LOCATIES OPHALEN
         warehouse_coords = geocode_address(WAREHOUSE_ADDRESS)
         if not warehouse_coords:
             flash("Magazijnadres kon niet gevonden worden.", "error")
@@ -299,30 +346,29 @@ def assign_orders(route_id):
 
         coords = [warehouse_coords]
         for o in all_orders:
-            c = geocode_address(o.delivery_address)
-            if not c:
+            loc = geocode_address(o.delivery_address)
+            if not loc:
                 flash(f"Adres niet gevonden: {o.delivery_address}", "error")
                 return redirect(url_for("admin.assign_orders", route_id=route_id))
-            coords.append(c)
+            coords.append(loc)
 
         distance_matrix = get_distance_matrix(coords)
         if not distance_matrix:
-            flash("Kon distance matrix niet berekenen.", "error")
+            flash("Kon afstandsmatrix niet berekenen.", "error")
             return redirect(url_for("admin.assign_orders", route_id=route_id))
 
-        optimal_route_indices = optimize_route(distance_matrix)
+        best_order = optimize_route(distance_matrix)
 
-        # Alle oude koppelingen van deze route weghalen
+        # Bestaande koppelingen van deze route leegmaken
         RouteDelivery.query.filter_by(route_id=route.route_id).delete()
 
-        # En nu de route opnieuw opbouwen met ALLE orders (oud + nieuw)
+        # Route opnieuw opbouwen met ALLE orders (oud + nieuw)
         seq = 1
-        for idx in optimal_route_indices:
+        for idx in best_order:
             if idx == 0:
-                continue  # index 0 is het magazijn
+                continue  # 0 = magazijn
 
             order_obj = all_orders[idx - 1]
-
             db.session.add(RouteDelivery(
                 route_id=route.route_id,
                 order_id=order_obj.order_id,
@@ -333,10 +379,12 @@ def assign_orders(route_id):
 
         db.session.commit()
 
-        flash("Route geoptimaliseerd (bestaande orders behouden).", "success")
+        flash("Route geoptimaliseerd.", "success")
         return redirect(url_for("admin.dashboard"))
 
-    # GET ------------------------------
+    # ------------------------------------------
+    # GET — DATUMFILTER
+    # ------------------------------------------
     delivery_date = request.args.get("delivery_date")
     if delivery_date:
         try:
@@ -346,40 +394,40 @@ def assign_orders(route_id):
     else:
         selected_date = route.route_date
 
-    # Orders die al aan deze route hangen
-    assigned_orders = (
-        PurchaseOrders.query
-        .join(RouteDelivery, PurchaseOrders.order_id == RouteDelivery.order_id)
-        .filter(RouteDelivery.route_id == route.route_id)
-        .all()
-    )
-
-    # Huidig totaal gewicht van de route
-    current_weight = sum(float(o.total_weight_kg or 0) for o in assigned_orders)
-
-    # Orders die nog NIET aan een route hangen en op deze dag geleverd worden
+    # ------------------------------------------
+    # BESCHIKBARE ORDERS
+    # ✔ leverdatum = geselecteerde dag
+    # ✔ nog NIET aan een route gekoppeld
+    # ✔ order_status != 'delivered'  (nooit al definitief geleverd)
+    # ------------------------------------------
     available_orders = (
         PurchaseOrders.query
         .filter(
             db.func.date(PurchaseOrders.delivery_window_end) == selected_date,
-            ~PurchaseOrders.route_links.any()
+            ~PurchaseOrders.route_links.any(),          # nog niet gekoppeld aan een route
+            PurchaseOrders.order_status != "delivered"  # niet definitief geleverd
         )
         .order_by(PurchaseOrders.order_id.asc())
         .all()
     )
 
+    # HUIDIG GEWICHT
+    current_weight = sum(float(o.total_weight_kg or 0) for o in assigned_orders)
+
+    # CAPACITEIT VAN HUIDIGE WAGEN
+    capacity = float(route.vehicle.capacity_kg) if route.vehicle and route.vehicle.capacity_kg else 0
+
     return render_template(
         "route_assign.html",
         route=route,
+        vehicles=vehicles,
         selected_date=selected_date,
         assigned_orders=assigned_orders,
         available_orders=available_orders,
         current_weight=current_weight,
-        capacity=float(route.vehicle.capacity_kg),
+        capacity=capacity,
+        route_locked=route_locked,
     )
-
-
-
 
 # -------------------------------------------
 # UPDATE ORDER
@@ -572,6 +620,20 @@ def edit_vehicle(vehicle_id):
         return redirect(url_for("admin.dashboard"))
 
     return render_template("vehicle_edit.html", vehicle=vehicle)
+
+# -------------------------------------------
+# ROUTE VOERTUIG WIJZIGEN (NIEUW)
+# -------------------------------------------
+@admin_bp.route("/routes/<int:route_id>/change-vehicle", methods=["POST"])
+def change_route_vehicle(route_id):
+    route = Route.query.get_or_404(route_id)
+    new_vehicle = request.form.get("vehicle_id")
+
+    if new_vehicle:
+        route.vehicle_id = new_vehicle
+        db.session.commit()
+
+    return redirect(url_for("admin.assign_orders", route_id=route_id))
 
 # -------------------------------------------
 # VOERTUIG VERWIJDEREN (NIEUW)

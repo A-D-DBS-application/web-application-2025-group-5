@@ -5,7 +5,6 @@ from .models import Route, RouteDelivery, User
 from . import db
 from app.admin_routes import update_route_status_if_completed
 
-
 driver_bp = Blueprint("driver", __name__, url_prefix="/driver")
 
 
@@ -13,10 +12,6 @@ driver_bp = Blueprint("driver", __name__, url_prefix="/driver")
 # ROLE CHECK
 # -----------------------------------------------------
 def require_driver_role():
-    """
-    Driver-rol vereist.
-    Admin + driver = OK
-    """
     return current_user.is_authenticated and current_user.has_role("driver")
 
 
@@ -28,20 +23,28 @@ def require_driver_role():
 def dashboard():
 
     # -------------------------------------------------
-    # VIEW MODE (admin / driver)
+    # VIEW MODE (CRUCIAAL)
     # -------------------------------------------------
     view_mode = request.args.get("view")
 
-    if not view_mode:
-        if current_user.has_role("admin") and current_user.has_role("driver"):
-            view_mode = "admin"
-        else:
+    # 🚨 BELANGRIJK:
+    # Drivers mogen NOOIT automatisch admin-view krijgen
+    if current_user.has_role("driver") and not current_user.has_role("admin"):
+        view_mode = "driver"
+
+    # Admin + driver → expliciet kiezen, default = driver
+    if current_user.has_role("admin") and current_user.has_role("driver"):
+        if view_mode not in ["admin", "driver"]:
             view_mode = "driver"
 
+    # Alleen admin (geen driver)
+    if current_user.has_role("admin") and not current_user.has_role("driver"):
+        view_mode = "admin"
+
     # -------------------------------------------------
-    # DRIVER SELECTIE
+    # DRIVER SELECTIE (ALLEEN ADMIN VIEW)
     # -------------------------------------------------
-    if current_user.has_role("admin") and view_mode == "admin":
+    if view_mode == "admin" and current_user.has_role("admin"):
         selected_driver_id = request.args.get("driver_id", type=int)
         all_drivers = User.query.filter(User.roles.contains("driver")).all()
 
@@ -51,6 +54,7 @@ def dashboard():
         driver_id = selected_driver_id
 
     else:
+        # DRIVER VIEW
         if not require_driver_role():
             flash("Je hebt geen toegang tot deze pagina.", "error")
             return redirect(url_for("auth.login"))
@@ -101,12 +105,12 @@ def dashboard():
         deliveries_tomorrow=deliveries_tomorrow,
         all_drivers=all_drivers,
         selected_driver_id=selected_driver_id,
-        view_mode=view_mode,   # 👈 belangrijk
+        view_mode=view_mode,  # ✅ dit stuurt de knoppen
     )
 
 
 # -----------------------------------------------------
-# MARK DELIVERY AS COMPLETED
+# UPDATE DELIVERY STATUS
 # -----------------------------------------------------
 @driver_bp.route("/delivery/<int:delivery_id>/update", methods=["POST"])
 @login_required
@@ -118,7 +122,7 @@ def update_delivery_status(delivery_id):
 
     delivery = RouteDelivery.query.get_or_404(delivery_id)
 
-    # Toegang
+    # Toegang check
     if (
         not current_user.has_role("admin")
         and delivery.route.driver_id != current_user.user_id
@@ -144,6 +148,7 @@ def update_delivery_status(delivery_id):
 
     delivery.delivery_comment = comment
     db.session.commit()
+
     update_route_status_if_completed(delivery.route_id)
 
     flash("Leveringsstatus bijgewerkt.", "success")

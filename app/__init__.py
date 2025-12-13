@@ -8,11 +8,35 @@ from config import DATABASE_URL
 
 db = SQLAlchemy()
 migrate = Migrate()
-
 login_manager = LoginManager()
-login_manager.login_view = "auth.login"   # Waar naartoe als je niet ingelogd bent
+login_manager.login_view = "auth.login"
 
 
+# -------------------------------------------------------
+# NEDERLANDSE DATUMFILTER
+# -------------------------------------------------------
+def format_dutch_date(value):
+    """Zet een Python date/datetime om naar Nederlandse datum."""
+    maanden = [
+        "januari", "februari", "maart", "april", "mei", "juni",
+        "juli", "augustus", "september", "oktober", "november", "december"
+    ]
+    dagen = [
+        "maandag", "dinsdag", "woensdag", "donderdag",
+        "vrijdag", "zaterdag", "zondag"
+    ]
+
+    try:
+        dagnaam = dagen[value.weekday()]
+        maandnaam = maanden[value.month - 1]
+        return f"{dagnaam.capitalize()} {value.day} {maandnaam}"
+    except Exception:
+        return value  # fallback: toon originele waarde
+
+
+# -------------------------------------------------------
+# CREATE APP
+# -------------------------------------------------------
 def create_app():
     app = Flask(__name__, template_folder="templates")
 
@@ -35,8 +59,8 @@ def create_app():
         "pool_pre_ping": True,
     }
 
-    # Nodig voor Flask-login sessions
-    app.secret_key = "dev"   # Vervang later door een echte secure key
+    # Login sessions key
+    app.secret_key = "dev"
 
     # -----------------------------------------------
     # INITIALIZE EXTENSIONS
@@ -46,14 +70,18 @@ def create_app():
     login_manager.init_app(app)
 
     # -----------------------------------------------
-    # USER LOADER (Flask-Login)
+    # REGISTER JINJA FILTER
+    # -----------------------------------------------
+    app.jinja_env.filters["nl_date"] = format_dutch_date
+
+    # -----------------------------------------------
+    # USER LOADER
     # -----------------------------------------------
     from .models import User
 
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
-
 
     # -----------------------------------------------
     # BLUEPRINTS
@@ -67,7 +95,7 @@ def create_app():
     app.register_blueprint(driver_bp)
 
     # -----------------------------------------------
-    # HOME REDIRECT
+    # HOME ROUTE
     # -----------------------------------------------
     @app.route("/")
     def index():
