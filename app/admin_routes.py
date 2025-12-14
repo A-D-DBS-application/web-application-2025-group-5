@@ -378,6 +378,67 @@ def assign_orders(route_id):
         capacity=float(route.vehicle.capacity_kg),
     )
 
+# -------------------------------------------
+# ROUTE BEWERKEN (VOERTUIG + VOLGORDE)
+# -------------------------------------------
+@admin_bp.route("/routes/<int:route_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_route(route_id):
+    if not require_admin():
+        return redirect(url_for("auth.login"))
+
+    route = Route.query.get_or_404(route_id)
+
+    # Alleen geplande routes mogen bewerkt worden
+    if route.route_status != "planned":
+        flash("Alleen geplande routes kunnen bewerkt worden.", "error")
+        return redirect(url_for("admin.dashboard"))
+
+    # Deliveries in huidige volgorde
+    deliveries = (
+        RouteDelivery.query
+        .filter_by(route_id=route.route_id)
+        .order_by(RouteDelivery.sequence.asc())
+        .all()
+    )
+
+    vehicles = Vehicle.query.filter_by(is_active=True).all()
+
+    if request.method == "POST":
+
+        # ---------------------------
+        # Voertuig wijzigen
+        # ---------------------------
+        vehicle_id = request.form.get("vehicle_id")
+        route.vehicle_id = vehicle_id if vehicle_id else None
+
+        # ---------------------------
+        # Volgorde opslaan
+        # ---------------------------
+        order_sequence = request.form.get("order_sequence")
+
+        if order_sequence:
+            ids = order_sequence.split(",")
+
+            for index, route_delivery_id in enumerate(ids, start=1):
+                rd = RouteDelivery.query.get(int(route_delivery_id))
+
+                # Extra veiligheid: alleen aanpassen als hij bij deze route hoort
+                if rd and rd.route_id == route.route_id:
+                    rd.sequence = index
+
+        db.session.commit()
+
+        flash("Route succesvol bijgewerkt.", "success")
+        return redirect(url_for("admin.dashboard"))
+
+    # GET → edit pagina tonen
+    return render_template(
+        "route_edit.html",
+        route=route,
+        deliveries=deliveries,
+        vehicles=vehicles,
+    )
 
 
 
