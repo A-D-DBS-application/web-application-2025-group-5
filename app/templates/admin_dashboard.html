@@ -186,9 +186,9 @@
               {% if problem_orders %}
                 <span class="badge bg-red-100 text-red-700">problemen</span>
               {% elif r.route_status == "completed" %}
-                <span class="badge bg-green-100 text-green-700">completed</span>
+                <span class="badge bg-green-100 text-green-700">afgerond</span>
               {% else %}
-                <span class="badge bg-yellow-100 text-yellow-700">planned</span>
+                <span class="badge bg-yellow-100 text-yellow-700">gepland</span>
               {% endif %}
             </p>
 
@@ -268,7 +268,7 @@
                     • Order #{{ d.order_id }}
                   </button>
 
-                  <span class="ml-2 badge
+                  <span class="ml-2 px-2 py-1 rounded-full text-xs font-medium
                     {% if d.delivery_status == 'delivered' %}
                       bg-green-100 text-green-700
                     {% elif d.delivery_status == 'not_delivered' %}
@@ -276,8 +276,16 @@
                     {% else %}
                       bg-yellow-100 text-yellow-700
                     {% endif %}">
-                    {{ d.delivery_status or "planned" }}
+  
+                    {% if d.delivery_status == 'delivered' %}
+                      geleverd
+                    {% elif d.delivery_status == 'not_delivered' %}
+                      niet afgeleverd
+                    {% else %}
+                      gepland
+                    {% endif %}
                   </span>
+
 
                   <div id="order-{{ r.route_id }}-{{ d.order_id }}"
                        class="hidden ml-4 mt-2 text-sm text-gray-700 space-y-1">
