@@ -5,3 +5,4 @@ psycopg2-binary
 gunicorn
 requests
 flask-login
+Babel==2.14.0
