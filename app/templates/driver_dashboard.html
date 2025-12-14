@@ -14,10 +14,7 @@
           Mijn Route
         {% endif %}
       </h1>
-
-      <p class="text-gray-500 text-sm">
-        {{ today|nl_date }}
-      </p>
+      <p class="text-gray-500 text-sm">{{ today|nl_date }}</p>
     </div>
 
     <div class="flex items-center gap-3">
@@ -27,7 +24,6 @@
           Terug naar Admin Dashboard
         </a>
       {% endif %}
-
       <a href="{{ url_for('auth.logout') }}"
          class="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-100">
         Uitloggen
@@ -35,98 +31,89 @@
     </div>
   </div>
 
-  <!-- VIEW MODE TOGGLE -->
+  <!-- 🔁 ADMIN / DRIVER TOGGLE -->
   {% if current_user.has_role('admin') and current_user.has_role('driver') %}
-  <div class="mb-6 flex gap-2">
-    <a href="{{ url_for('driver.dashboard', view='driver') }}"
-       class="px-4 py-2 rounded-lg border text-sm
-       {{ 'bg-green-600 text-white' if view_mode == 'driver' else 'bg-white text-gray-700' }}">
-      Driver-weergave
-    </a>
+    <div class="mb-6 flex gap-2">
+      <a href="{{ url_for('driver.dashboard', view='driver') }}"
+         class="px-4 py-2 rounded-lg border text-sm
+         {% if view_mode == 'driver' %}bg-green-600 text-white{% else %}bg-white{% endif %}">
+        Driver-weergave
+      </a>
 
-    <a href="{{ url_for('driver.dashboard', view='admin', driver_id=selected_driver_id) }}"
-       class="px-4 py-2 rounded-lg border text-sm
-       {{ 'bg-blue-600 text-white' if view_mode == 'admin' else 'bg-white text-gray-700' }}">
-      Admin-weergave
-    </a>
-  </div>
+      <a href="{{ url_for('driver.dashboard', view='admin') }}"
+         class="px-4 py-2 rounded-lg border text-sm
+         {% if view_mode == 'admin' %}bg-blue-600 text-white{% else %}bg-white{% endif %}">
+        Admin-weergave
+      </a>
+    </div>
   {% endif %}
 
   <!-- ROUTE VAN VANDAAG -->
   {% if not route_today %}
-    <div class="bg-white border border-gray-200 rounded-xl p-6">
+    <div class="bg-white border rounded-xl p-6">
       <p class="text-gray-500">Geen route vandaag.</p>
     </div>
   {% else %}
 
-  <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
+  <div class="bg-white border rounded-xl p-6 mb-6">
     <p><strong>Driver:</strong> {{ route_today.driver.name }}</p>
-    <p><strong>Voertuig:</strong>
-      {{ route_today.vehicle.license_plate if route_today.vehicle else "Geen voertuig" }}
-    </p>
+    <p><strong>Voertuig:</strong> {{ route_today.vehicle.license_plate }}</p>
     <p><strong>Status:</strong> {{ route_today.route_status }}</p>
   </div>
 
   <ul class="space-y-4">
     {% for d in deliveries_today %}
+    {% set status = d.delivery_status or 'planned' %}
+
     <li class="p-4 rounded-xl border bg-gray-50">
 
+      <!-- BOVEN -->
       <div class="flex justify-between items-start">
         <div>
-          <p class="font-medium">
-            Stop {{ loop.index }} – Order #{{ d.order_id }}
-          </p>
-          <p class="text-sm text-gray-600">
-            {{ d.order.delivery_address }}
-          </p>
+          <p class="font-medium">Stop {{ loop.index }} – Order #{{ d.order_id }}</p>
+          <p class="text-sm text-gray-600">{{ d.order.delivery_address }}</p>
 
-          {% if d.delivery_status and d.delivery_comment %}
+          {% if status == 'not_delivered' and d.delivery_comment %}
             <p class="text-sm text-red-600 mt-1">
               <strong>Reden:</strong> {{ d.delivery_comment }}
             </p>
           {% endif %}
         </div>
 
-        {% if d.delivery_status %}
+        <!-- STATUS BADGE -->
         <span class="px-3 py-0.5 rounded-full text-[11px] font-medium
-          {% if d.delivery_status == 'delivered' %}
-            bg-green-100 text-green-700
-          {% else %}
-            bg-red-100 text-red-700
-          {% endif %}">
-          {{ 'Geleverd' if d.delivery_status == 'delivered' else 'Niet geleverd' }}
+          {% if status == 'planned' %}bg-gray-100 text-gray-600
+          {% elif status == 'delivered' %}bg-green-100 text-green-700
+          {% else %}bg-red-100 text-red-700{% endif %}">
+          {% if status == 'planned' %}Gepland
+          {% elif status == 'delivered' %}Geleverd
+          {% else %}Niet geleverd{% endif %}
         </span>
-        {% endif %}
       </div>
 
       <!-- DRIVER ACTIES -->
-      {% if view_mode == "driver" and current_user.has_role('driver') %}
-        {% if d.delivery_status is none %}
+      {% if view_mode == "driver" and current_user.has_role("driver") and status == 'planned' %}
+      <form method="POST"
+            action="{{ url_for('driver.update_delivery_status', delivery_id=d.route_delivery_id) }}"
+            class="mt-3 space-y-2">
 
-        <form method="POST"
-              action="{{ url_for('driver.update_delivery_status',
-                                 delivery_id=d.route_delivery_id) }}"
-              class="mt-3 space-y-2">
+        <textarea name="delivery_comment"
+                  rows="2"
+                  class="w-full border rounded-lg px-3 py-2 text-sm"
+                  placeholder="Reden (verplicht bij niet geleverd)"></textarea>
 
-          <textarea name="delivery_comment"
-                    rows="2"
-                    class="w-full border rounded-lg px-3 py-2 text-sm"
-                    placeholder="Verplicht bij niet leveren…"></textarea>
+        <div class="flex justify-end gap-2">
+          <button name="action" value="delivered"
+                  class="px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm">
+            ✔ Geleverd
+          </button>
 
-          <div class="flex gap-2 justify-end">
-            <button name="action" value="delivered"
-                    class="px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm hover:bg-green-200">
-              ✔ Geleverd
-            </button>
-
-            <button name="action" value="not_delivered"
-                    class="px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm hover:bg-red-200">
-              ✖ Niet geleverd
-            </button>
-          </div>
-        </form>
-
-        {% endif %}
+          <button name="action" value="not_delivered"
+                  class="px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm">
+            ✖ Niet geleverd
+          </button>
+        </div>
+      </form>
       {% endif %}
 
     </li>
@@ -134,38 +121,5 @@
   </ul>
 
   {% endif %}
-
-  <!-- ROUTE VAN MORGEN -->
-  <div class="mt-10">
-    <h2 class="text-xl font-semibold text-gray-800 mb-3">
-      Route van morgen
-    </h2>
-
-    {% if not route_tomorrow %}
-      <p class="text-gray-500">Geen route gepland voor morgen.</p>
-    {% else %}
-      <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
-        <p><strong>Driver:</strong> {{ route_tomorrow.driver.name }}</p>
-        <p><strong>Voertuig:</strong>
-          {{ route_tomorrow.vehicle.license_plate if route_tomorrow.vehicle else "Geen voertuig" }}
-        </p>
-        <p><strong>Status:</strong> {{ route_tomorrow.route_status }}</p>
-      </div>
-
-      <ul class="space-y-4">
-        {% for d in deliveries_tomorrow %}
-        <li class="p-4 rounded-xl border bg-gray-50">
-          <p class="font-medium">
-            Stop {{ loop.index }} – Order #{{ d.order_id }}
-          </p>
-          <p class="text-sm text-gray-600">
-            {{ d.order.delivery_address }}
-          </p>
-        </li>
-        {% endfor %}
-      </ul>
-    {% endif %}
-  </div>
-
 </div>
 {% endblock %}
