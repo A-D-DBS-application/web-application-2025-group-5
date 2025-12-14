@@ -5,6 +5,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from config import DATABASE_URL
+from babel.dates import format_date
+
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -54,7 +56,12 @@ def create_app():
     def load_user(user_id):
         return User.query.get(int(user_id))
 
-
+    # -----------------------------------------------
+    # nederlandse datum
+    # ----------------------------------------------- 
+    @app.template_filter("nl_date")
+    def nl_date(date):
+        return format_date(date, format="EEEE d MMMM", locale="nl")
     # -----------------------------------------------
     # BLUEPRINTS
     # -----------------------------------------------
