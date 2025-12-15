@@ -40,7 +40,7 @@ How to run the app locally
 * 3. Create a .env file in the project root
 * 4. Start the application:
      python3 run.py
-     pip install babel
+* pip install babel
 * 5. Open the app in your browser:
      http://127.0.0.1:5000/
      
