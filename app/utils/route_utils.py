@@ -26,7 +26,7 @@ def get_distance_matrix(coordinates):
 
     matrix = r["durations"]
 
-    # --- FIX: vervang None door grote waarde zodat SciPy kan rekenen ---
+    # Vervang None-waarden door een grote strafwaarde
     for i in range(len(matrix)):
         for j in range(len(matrix[i])):
             if matrix[i][j] is None:
@@ -36,15 +36,15 @@ def get_distance_matrix(coordinates):
 
 def optimize_route(distance_matrix):
     """
-    Vind een optimale volgorde van stops.
-    Punt 0 = magazijn (altijd startpunt)
-    Rest = nearest-neighbour + SciPy dummy-call
+    Berekent een efficiënte volgorde van stops.
+    Start altijd in het magazijn (punt 0) en kiest daarna
+    telkens de dichtstbijzijnde volgende stop (nearest neighbour).
     """
 
     n = len(distance_matrix)
 
 
-    # --- Echte routeberekening ---
+    # routeberekening via nearest neighbour
     visited = set([0])
     route = [0]  # start = magazijn
 
