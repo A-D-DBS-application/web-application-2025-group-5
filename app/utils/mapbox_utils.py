@@ -2,7 +2,7 @@ import requests
 
 MAPBOX_TOKEN = "pk.eyJ1IjoiYmFydGJhdHNsZWVyIiwiYSI6ImNtaW5rbG8yYTBwd2cza3Nib3NvMHl4MWYifQ.2LaqFIMyfJqVMWu8daLDUw"
 
-def geocode_address(address):
+def geocode_address(address): #functie die bestellingsadres omzet naar (lng, lat)
     """Convert address to (lng, lat) coordinates using Mapbox Geocoding API."""
 
     url = f"https://api.mapbox.com/geocoding/v5/mapbox.places/{address}.json"
