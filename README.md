@@ -65,46 +65,56 @@ This kanban board includes all major features of the RoutePlanner application.
 
 ## Project Structure
 ```txt
-routeplanner/
+GitHub/
 ├── app/
-│   ├── __pycache__/
+│   ├── __init__.py             
+│   ├── models.py                
 │   │
-│   ├── templates/
-│   │   ├── admin_dashboard.html
-│   │   ├── base.html
-│   │   ├── driver_dashboard.html
-│   │   ├── login.html
-│   │   ├── order_create.html
-│   │   ├── order_edit.html
-│   │   ├── route_assign.html
-│   │   ├── route_create.html
-│   │   ├── user_create.html
-│   │   └── vehicle_create.html
+│   ├── auth_routes.py        
+│   ├── admin_routes.py          
+│   ├── driver_routes.py         
+│   ├── preview_routes.py        
 │   │
 │   ├── utils/
 │   │   ├── __init__.py
-│   │   ├── admin_routes.py
-│   │   ├── auth_routes.py
-│   │   ├── driver_routes.py
-│   │   └── preview_routes.py
-│   │
-│   ├── Database/
-│   ├── migrations/
-│   │
-│   ├── models.py
-│   ├── config.py
-│   └── admin_routes.py
-│
+│   │   ├── route_utils.py
+│   │   └── mapbox_utils.py
+│   ├── static/
+│   │   ├── css/
+│   │   │   └── main.css
+│   │   └── images/
+│   │       └── logo_zonder naam.png
+│   └── templates/
+│       ├── base.html
+│       ├── login.html
+│       │
+│       ├── admin_dashboard.html
+│       ├── driver_dashboard.html
+│       │
+│       ├── route_assign.html
+│       ├── route_create.html
+│       ├── route_edit.html
+│       │
+│       ├── order_create.html
+│       ├── order_edit.html
+│       │
+│       ├── user_create.html
+│       ├── user_edit.html
+│       │
+│       ├── vehicle_create.html
+│       └── vehicle_edit.html
+├── migrations/                 
 ├── scripts/
+│   └── create_tables_and_seed.py
 │
+├── config.py                  
+├── run.py                       
 ├── requirements.txt
 ├── README.md
-├── run.py
 └── .gitignore
+
 ```
 
-
-## Additional information
 
 
 
