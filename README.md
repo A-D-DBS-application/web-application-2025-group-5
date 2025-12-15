@@ -63,7 +63,8 @@ This kanban board includes all major features of the RoutePlanner application.
 ## Feedback Sessions
 
 * Link to sprint 1: https://ugentbe-my.sharepoint.com/:v:/g/personal/victorien_vermeersch_ugent_be/Edi2W6wGy7JMpKB3N8SnxFYBPhff8iLoWZdP1yW2dYCQpg?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=k76rMe
-* Link to sprint 2: https://ugentbe-my.sharepoint.com/:v:/g/personal/victorien_vermeersch_ugent_be/EcVaoNV888hKsiFzgrlSL0sBXaIhPaxLhvwppNbgLfrMjw?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D&email=Thomas.Derave%40UGent.be&e=QGRxHX 
+* Link to sprint 2: https://ugentbe-my.sharepoint.com/:v:/g/personal/victorien_vermeersch_ugent_be/EcVaoNV888hKsiFzgrlSL0sBXaIhPaxLhvwppNbgLfrMjw?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D&email=Thomas.Derave%40UGent.be&e=QGRxHX
+* Link to sprint 3:
 
 ## Project Structure
 ```txt
