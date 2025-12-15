@@ -46,8 +46,8 @@ How to run the app locally
      
 Render link:
 https://web-application-2025-group-5.onrender.com
-!! To login as Admin you can use the following passwords: Bart, Giovanni, Koen 
-!! To login as Driver you can use the following passwords: Christoph, Jytte, Pieter-Jan
+* !! To login as Admin you can use the following passwords: Bart, Giovanni, Koen 
+* !! To login as Driver you can use the following passwords: Christoph, Jytte, Pieter-Jan
 
 ## UI Prototype
 
