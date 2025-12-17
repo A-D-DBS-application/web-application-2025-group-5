@@ -69,7 +69,7 @@ This kanban board includes all major features of the RoutePlanner application.
 ## ERD model
 You can find it above, under the file: Database/ERD model.png
 
-## DDL
+## DDL model
 You can find it above, under the file: Database/DDL model.pdf
 
 
