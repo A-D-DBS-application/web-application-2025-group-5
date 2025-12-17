@@ -22,32 +22,40 @@ The goal of Wineway is to simplify delivery planning, reduce errors, and create 
 
 ## Installation & Usage
 
-How to run the app locally
-* 1. Create and activate a virtual environment
-     
-     Windows:
-     python -m venv venv
-     venv\Scripts\activate
-     
-     MacOs:
-     python3 -m venv venv
-     source venv/bin/activate
-     
-* 2. Install dependencies:
-     pip install flask-login
-     pip install -r requirements.txt
+### How to run the app locally
 
-* 3. Create a .env file in the project root
-* 4. Start the application:
-     python3 run.py
-* 5. pip install babel
-* 6. Open the app in your browser:
-     http://127.0.0.1:5000/
-     
-Render link:
+1. Create and activate a virtual environment
+
+   **Windows**
+   python -m venv venv  
+   venv\Scripts\activate  
+
+   **macOS**
+   python3 -m venv venv  
+   source venv/bin/activate  
+
+2. Install dependencies
+   pip install flask-login  
+   pip install -r requirements.txt  
+
+3. Create a `.env` file in the project root
+
+4. Install Babel
+   pip install babel  
+
+5. Start the application
+   python run.py  
+
+6. Open the app in your browser
+   http://127.0.0.1:5000/
+
+   
+### Deployment (Render)     
 https://web-application-2025-group-5.onrender.com
-* !! To login as Admin you can use the following passwords: Bart, Giovanni, Koen 
-* !! To login as Driver you can use the following passwords: Christoph, Jytte, Pieter-Jan
+
+**Admin login passwords:**  Bart, Giovanni, Koen 
+
+**Driver login passwords:** Christoph, Jytte, Pieter-Jan
 
 ## UI Prototype
 
@@ -71,6 +79,11 @@ You can find it above, under the file: Database/ERD model.png
 
 ## DDL model
 You can find it above, under the file: Database/DDL model.pdf
+
+## Database dump
+The file `Database/supabase_backup.sql` contains a PostgreSQL database dump
+exported from our Supabase database.  
+It includes the database schema and sample data and serves as a backup of the database.
 
 
 ## Project Structure
