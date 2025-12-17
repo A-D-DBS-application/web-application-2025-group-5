@@ -83,10 +83,10 @@ This kanban board includes all major features of the RoutePlanner application.
 * Link to sprint 3: https://ugentbe-my.sharepoint.com/:v:/r/personal/lisa_naert_ugent_be/Documents/Opnamen/Bellen%20met%20Ilya%20en%203%20anderen-20251212_200828-Opname%20van%20vergadering.mp4?csf=1&web=1&e=wupdkv&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D
 
 ## ERD model
-You can find it above, under the file: Database/ERD model.png
+You can find it above, under the file: `Database/ERD model.png`
 
 ## DDL model
-You can find it above, under the file: Database/DDL model.pdf
+You can find it above, under the file: `Database/DDL model.pdf`
 
 ## Database dump
 The file `Database/supabase_backup.sql` contains a PostgreSQL database dump
