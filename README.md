@@ -64,7 +64,8 @@ This kanban board includes all major features of the RoutePlanner application.
 
 * Link to sprint 1: https://ugentbe-my.sharepoint.com/:v:/g/personal/victorien_vermeersch_ugent_be/Edi2W6wGy7JMpKB3N8SnxFYBPhff8iLoWZdP1yW2dYCQpg?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=k76rMe
 * Link to sprint 2: https://ugentbe-my.sharepoint.com/:v:/g/personal/victorien_vermeersch_ugent_be/EcVaoNV888hKsiFzgrlSL0sBXaIhPaxLhvwppNbgLfrMjw?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D&email=Thomas.Derave%40UGent.be&e=QGRxHX
-* Link to sprint 3:
+* Link to sprint 3: https://ugentbe-my.sharepoint.com/:v:/r/personal/lisa_naert_ugent_be/Documents/Opnamen/Bellen%20met%20Ilya%20en%203%20anderen-20251212_200828-Opname%20van%20vergadering.mp4?csf=1&web=1&e=wupdkv&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D
+
 
 ## Project Structure
 ```txt
