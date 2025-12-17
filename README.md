@@ -27,26 +27,34 @@ The goal of Wineway is to simplify delivery planning, reduce errors, and create 
 1. Create and activate a virtual environment
 
    **Windows**
+   ```bash
    python -m venv venv  
-   venv\Scripts\activate  
-
+   venv\Scripts\activate
+   ```
+  
    **macOS**
+   ```bash
    python3 -m venv venv  
-   source venv/bin/activate  
+   source venv/bin/activate
+   ```
 
 2. Install dependencies
+   ``` bash
    pip install flask-login  
-   pip install -r requirements.txt  
+   pip install -r requirements.txt
+   ``` 
 
 3. Create a `.env` file in the project root
 
 4. Install Babel
-   pip install babel  
+   ```bash
+   pip install babel
+   ```
 
-5. Start the application
+7. Start the application
    python run.py  
 
-6. Open the app in your browser
+8. Open the app in your browser
    http://127.0.0.1:5000/
 
    
