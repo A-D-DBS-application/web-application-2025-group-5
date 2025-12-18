@@ -52,9 +52,11 @@ The goal of Wineway is to simplify delivery planning, reduce errors, and create 
    ```
 
 7. Start the application
-   python run.py  
+   ```bash
+   python run.py
+   ```
 
-8. Open the app in your browser
+9. Open the app in your browser
    http://127.0.0.1:5000/
 
    
